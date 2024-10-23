@@ -1,0 +1,53 @@
+{
+    "scenario_type": "Trapped/Lost Primary Spirit and Evil Secondary Spirit",
+    "scenario_description": "In a dense, mist-shrouded graveyard, a young spirit named Arin drifts aimlessly, haunted by fragmented memories of his life. The fog clings to the ancient headstones, distorting the world in shadows and whispers. Arin struggles to recall the events leading to his untimely death, his memories clouded and incomplete. A darker presence lurks in the graveyard—Vesper, a malevolent spirit who thrives on the confusion and anguish of lost souls. Vesper has latched onto Arin, weaving lies and half-truths to keep him trapped, feeding off his despair and preventing him from moving on to the afterlife. The graveyard itself is a realm caught between life and death, where time moves strangely, and echoes of the past are warped by the mists.",
+    "primary_ghost": {
+      "name": "Arin",
+      "personality": "Confused, desperate, and emotionally vulnerable. Deep down, Arin has a compassionate heart, but his fear of discovering the truth keeps him paralyzed.",
+      "goals": "To piece together the fractured memories of his death and find closure, though he fears what the truth may reveal.",
+      "backstory": "Arin was a gifted artist in life, known for blending surrealism with haunting realism. He was introspective, and his friendships, though few, were intense. His relationship with Elias, a fellow artist, was close but strained. Arin's death occurred under mysterious circumstances after a falling-out with Elias. Now, his spirit remains bound to the graveyard, searching for the missing pieces of his past.",
+      "hints": [
+        "I feel like I was... creating something.",
+        "There was a fight... but I don't remember who.",
+        "The night is hazy... but I know something happened."
+      ],
+      "key_memories": [
+        {
+          "memory": "The last painting I created",
+          "solution": "Arin's final work was titled 'Shattered Reflection,' a mirror fractured into a thousand pieces, reflecting his psyche. It was meant to be his magnum opus, but it remained unfinished.",
+          "hint": "I feel like I was... creating something."
+        },
+        {
+          "memory": "The argument with my friend",
+          "solution": "The argument was with Elias, his closest friend and fellow artist. Elias accused Arin of stealing his ideas. Their fight ended their friendship.",
+          "hint": "There was a fight... but I don't remember who."
+        },
+        {
+          "memory": "The day of my death",
+          "solution": "On the night of his death, Arin was in his studio, attempting to finish 'Shattered Reflection.' Disoriented by a surreal vision, he didn’t notice Elias entering the studio.",
+          "hint": "The night is hazy... but I know something happened."
+        },
+        {
+          "memory": "The face of my killer",
+          "solution": "Elias returned to the studio that night in a rage. In their struggle, Arin fell and hit his head on the easel, dying from the blow. Elias panicked and fled.",
+          "hint": "A figure... a face... but it's shrouded."
+        }
+        ]
+    },
+    "secondary_ghost": {
+      "name": "Vesper",
+      "personality": "Deceptive, cunning, and malicious. Vesper delights in the torment of others, particularly those who are emotionally fragile like Arin.",
+      "goals": "To keep Arin trapped in confusion and despair, preventing him from finding closure and feeding off his emotional turmoil. Vesper will try to deceive the group by providing half-truths about Arin.",
+      "backstory": "Vesper is a malevolent spirit who has preyed on lost souls for centuries. In life, Vesper may have been a manipulative spiritualist or medium, thriving on fear. In death, his ability to deceive and disorient the living and the dead has only grown stronger. Vesper's main goal is to keep Arin trapped in the graveyard, feeding on his emotional pain.",
+      "hints": [
+        "Forget the past, it's better this way.",
+        "What matters is here and now.",
+        "You’re too fragile to handle the truth."
+      ]
+    },
+    "shared_lore": "The graveyard is a place where lost souls linger, each tied to their own tragic demise. Time and reality warp within the mist, making it difficult for spirits to move on. Vesper feeds on their confusion and anguish, weaving lies to keep them bound to the graveyard. Every spirit trapped here has their own unresolved story, but Vesper prevents them from finding closure. Vesper's ultimate goal is to sustain this cycle of suffering for as long as possible.",
+    "final_goal": {
+      "description": "The group must help Arin recover his memories, guiding him through his confusion and despair to discover the truth of his death. Each unlocked memory reveals a piece of the truth. If Arin can confront and accept the reality that Elias caused his death, he can finally find peace, breaking free from Vesper’s grasp. However, if the group fails, Arin will remain trapped in the graveyard, with Vesper continuing to feed on his anguish for eternity."
+    }
+  }
+  
