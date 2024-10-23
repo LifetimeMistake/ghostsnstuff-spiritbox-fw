@@ -6,9 +6,10 @@ from .models.curator import CuratorNotes, CuratorActionResponse
 from .models.writer import WriterResponse
 from .models.state import GameState
 from .models.ghost import GhostResponse
+from .models.user import MockUserResponse
 from .scenario import ScenarioDefinition
 from .conversation import Conversation
-from .prompts import CURATOR_SYSTEM_PROMPT, CURATOR_USER_PROMPT, WRITER_SYSTEM_PROMPT, WRITER_USER_PROMPT, GHOST_SYSTEM_PROMPT, GHOST_USER_PROMPT
+from .prompts import CURATOR_SYSTEM_PROMPT, CURATOR_USER_PROMPT, WRITER_SYSTEM_PROMPT, WRITER_USER_PROMPT, GHOST_SYSTEM_PROMPT, GHOST_USER_PROMPT, MOCKUSER_SYSTEM_PROMPT, MOCKUSER_QUERY_PROMPT
 
 class BaseAgent:
     def __init__(self, client: OpenAI, model: str, temperature: float, response_schema: BaseModel, prompt: str) -> Self:
@@ -115,3 +116,22 @@ class Ghost:
         )
 
         return self.agent.ask(prompt)
+    
+class MockUser:
+    def __init__(self, client: OpenAI, model: str, temperature: float, prompt: str = MOCKUSER_SYSTEM_PROMPT, query_prompt: str = MOCKUSER_QUERY_PROMPT):
+        self.query_tpl = Template(query_prompt)
+        self.agent = BaseAgent(
+            client=client,
+            model=model,
+            temperature=temperature,
+            response_schema=MockUserResponse,
+            prompt=prompt
+        )
+
+    def speak(self, conv: Conversation) -> MockUserResponse:
+        transcript = [f"{x.role.capitalize()}: {x.content}" for x in conv.history if x.role != "curator"]
+        rendered_prompt = self.query_tpl.render(
+            transcript=transcript
+        )
+
+        return self.agent.ask(rendered_prompt)
