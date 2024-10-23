@@ -242,7 +242,9 @@ Your identity, personality, and role details are as follows:
   {% if ghost.key_memories %}
   - Key memories:
     {% for memory in ghost.key_memories %}
-    - {{ memory }}
+    - **{{ memory.memory }}**
+      Hint: {{ memory.hint }}
+      Solution: {{ memory.solution }}
     {% endfor %}
   {% endif %}
 
@@ -264,7 +266,9 @@ You are aware of the presence of the other ghost, but you do not directly contro
     {% if other_ghost.key_memories %}
     - Other Ghost's Key memories:
       {% for memory in other_ghost.key_memories %}
-      - {{ memory }}
+      - **{{ memory.memory }}**
+        Hint: {{ memory.hint }}
+        Solution: {{ memory.solution }}
       {% endfor %}
     {% endif %}
 
