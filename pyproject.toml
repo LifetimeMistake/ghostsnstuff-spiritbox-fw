@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "ghostsnstuff-spiritbox-fw"
+version = "0.1.0"
+description = "Firmware for a Raspberry PI based spirit box connected to OpenAI."
+authors = ["LifetimeMistake"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
