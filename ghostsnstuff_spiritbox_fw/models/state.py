@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Self
-from utils import clamp
+from ..utils import clamp
 
 class GameState:
     def __init__(self, activity_level = 1.0, scaling_factor = 0.1, timer = 0.0) -> Self:

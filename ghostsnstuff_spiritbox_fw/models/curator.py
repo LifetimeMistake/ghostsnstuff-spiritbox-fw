@@ -1,24 +1,20 @@
-from typing import Self, Optional, Union
-from pydantic import BaseModel
+from typing import Self, Optional, Union, Literal
+from pydantic import BaseModel, Field
 
 class CuratorNotes:
     def __init__(self) -> Self:
         self.primary_ghost_note = None
         self.secondary_ghost_note = None
 
-# End Condition Struct
-class EndCondition(BaseModel):
-    game_result: str  # "win" or "fail"
-    reasoning: str  # Explanation for ending the game
-
 
 # Regular Response Struct
-class CuratorResponse(BaseModel):
+class CuratorActionResponse(BaseModel):
     primary_ghost_note: Optional[str] = None  # Instructions for primary ghost (can be empty to reset)
     secondary_ghost_note: Optional[str] = None  # Instructions for secondary ghost (can be empty to reset)
     activity_level: Optional[float] = None  # Current activity level (1-10, or None if unchanged)
     timer_value: Optional[float] = None  # Remaining timer value (or None if unchanged)
     user_prompt_correction: Optional[str] = None  # Corrected user input (or None if no correction needed)
+    game_result: Optional[str] = None
     reasoning: str  # Reason for the updates made by the curator
 
     class Config:
@@ -29,8 +25,7 @@ class CuratorResponse(BaseModel):
                 "activity_level": None,
                 "timer_value": None,
                 "user_prompt_correction": None,
+                "game_result": None,
                 "reasoning": "I updated the ghost notes because I felt the ghosts were going off on a tangent."
             }
         }
-
-CuratorActionResponse = Union[CuratorResponse, EndCondition]

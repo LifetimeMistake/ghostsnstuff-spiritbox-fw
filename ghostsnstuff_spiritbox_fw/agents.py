@@ -1,12 +1,13 @@
-from typing import Self
+from typing import Self, Optional
 from openai import OpenAI
 from pydantic import BaseModel
 from jinja2 import Template
 from .models.curator import CuratorNotes, CuratorActionResponse
+from .models.writer import WriterResponse
 from .models.state import GameState
 from .scenario import ScenarioDefinition
 from .conversation import Conversation
-from .prompts import CURATOR_PROMPT, CURATOR_USER_PROMPT
+from .prompts import CURATOR_SYSTEM_PROMPT, CURATOR_USER_PROMPT, WRITER_SYSTEM_PROMPT, WRITER_USER_PROMPT
 
 class BaseAgent:
     def __init__(self, client: OpenAI, model: str, temperature: float, response_schema: BaseModel, prompt: str) -> Self:
@@ -32,11 +33,11 @@ class BaseAgent:
         return response.choices[0].message.parsed
     
 class Curator:
-    def __init__(self, client: OpenAI, model: str, temperature: float, scenario: ScenarioDefinition, prompt: str = CURATOR_PROMPT, user_prompt: str = CURATOR_USER_PROMPT) -> Self:
+    def __init__(self, client: OpenAI, model: str, temperature: float, scenario: ScenarioDefinition, prompt: str = CURATOR_SYSTEM_PROMPT, user_prompt: str = CURATOR_USER_PROMPT) -> Self:
         prompt_tpl = Template(prompt)
         self.query_tpl = Template(user_prompt)
         rendered_prompt = prompt_tpl.render(
-            scneario=scenario
+            scenario=scenario
         )
         self.agent = BaseAgent(
             client=client,
@@ -52,6 +53,26 @@ class Curator:
             transcript=str(conv),
             curator_notes=notes,
             query=query
+        )
+
+        return self.agent.ask(prompt)
+    
+class Writer:
+    def __init__(self, client: OpenAI, model: str, temperature: float, prompt: str = WRITER_SYSTEM_PROMPT, user_prompt: str = WRITER_USER_PROMPT) -> Self:
+        self.query_tpl = Template(user_prompt)
+        self.agent = BaseAgent(
+            client=client,
+            model=model,
+            temperature=temperature,
+            response_schema=WriterResponse,
+            prompt=prompt
+        )
+
+    def generate(self, prompt: str, scenario_type: str, scenario_example: Optional[ScenarioDefinition] = None) -> WriterResponse:
+        prompt = self.query_tpl.render(
+            scenario_type=scenario_type,
+            scenario_prompt=prompt,
+            scenario_example=scenario_example or "N/A"
         )
 
         return self.agent.ask(prompt)
