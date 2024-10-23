@@ -11,10 +11,14 @@ class Conversation:
 
     def __str__(self):
         buffer = []
-        for message in self.history:
-            buffer.append(f"{message.role}: {message.content}")
-
-        return "\n".join(buffer)
+        user_message_found = False
+        for message in reversed(self.history):
+            if message.role == "user" and not user_message_found:
+                buffer.append(f"(current interaction) >> {message.role}: {message.content}")
+                user_message_found = True
+            else:
+                buffer.append(f"{message.role}: {message.content}")
+        return "\n".join(reversed(buffer))
     
     def push(self, message: Message):
         self.history.append(message)
