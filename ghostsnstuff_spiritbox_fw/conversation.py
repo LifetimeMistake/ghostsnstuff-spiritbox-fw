@@ -1,7 +1,7 @@
 from typing import Literal, Optional
 
 class Message:
-    def __init__(self, role: Literal["user"] | Literal["primary"] | Literal["secondary"], content: str):
+    def __init__(self, role: Literal["user"] | Literal["primary"] | Literal["secondary"] | Literal["curator"], content: str):
         self.role = role
         self.content = content
 
