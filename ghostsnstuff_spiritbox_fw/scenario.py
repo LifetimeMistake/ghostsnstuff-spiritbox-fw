@@ -7,6 +7,11 @@ class RitualDefinition(BaseModel):
     description: str
     phrase: str
 
+class Memory(BaseModel):
+    memory: str
+    hint: str
+    solution: str
+
 class GhostDefinition(BaseModel):
     name: str
     personality: str
@@ -14,7 +19,7 @@ class GhostDefinition(BaseModel):
     backstory: str
     hints: List[str]
     ritual: Optional[RitualDefinition] = None  # This applies to ghosts with rituals
-    key_memories: Optional[List[str]] = None  # This applies to ghosts with locked key memories
+    key_memories: Optional[List[Memory]] = None  # This applies to ghosts with locked key memories
 
 
 class FinalGoalDefinition(BaseModel):

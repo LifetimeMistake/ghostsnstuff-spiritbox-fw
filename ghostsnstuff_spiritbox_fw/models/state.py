@@ -10,7 +10,7 @@ class GameState:
         self.reset()
         
     def set_activity_level(self, level):
-        self.activity_level = clamp(level, 1.0, 10.0)
+        self.activity_level = round(clamp(level, 1.0, 10.0), 3)
         
     def reset(self):
         self.set_activity_level(self.initial_activity_level)
