@@ -26,7 +26,7 @@ if isOnWin():
 
 if (isOnPi()):
     import st7735
-    import PIL
+    from PIL import Image, ImageDraw, ImageFont
     global disp
     disp = st7735.ST7735(port=0,cs=st7735.BG_SPI_CS_BACK,dc="GPIO9",backlight="GPIO12", rotation=90, spi_speed_hz=4000000)
     
