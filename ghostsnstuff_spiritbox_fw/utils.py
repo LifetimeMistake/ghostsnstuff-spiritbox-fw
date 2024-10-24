@@ -54,3 +54,26 @@ def weighted_ghost_choice(activity_level):
 
     # Choose based on the weighted distribution
     return random.choices(options, weights=weights, k=1)[0]
+
+def sanitize_ghost_speech(content: list[str] | str, word_limit: int = 5) -> list[str] | str:
+    def sanitize_word(word: str) -> str:
+        # If the word is actually a sentence, return the longest word from that sentence
+        if " " in word:
+            print(f"WARN: Fixing bad word '{word}'")
+            subwords = word.split(" ")
+            return max(subwords, key=len).upper()  # Return the longest subword in uppercase
+        return word.upper()
+
+    if isinstance(content, str):
+        words = content.split(" ")
+        if len(words) > word_limit:
+            print(f"WARN: Trimming sentence: {len(words)}->{word_limit} words")
+        return " ".join([sanitize_word(w) for w in words[:word_limit]])
+
+    else:
+        sanitized_words = []
+        for word in content:
+            sanitized_words.append(sanitize_word(word))
+        if len(sanitized_words) > word_limit:
+            print(f"WARN: Trimming word list: {len(sanitized_words)}->{word_limit} words")
+        return sanitized_words[:word_limit]

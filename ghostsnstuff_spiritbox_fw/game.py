@@ -1,11 +1,12 @@
 from openai import OpenAI
-from typing import Self, Optional
+from typing import Self, Optional, List
 from .scenario import ScenarioDefinition
-from .models.curator import CuratorNotes, CuratorActionResponse
+from .models.curator import CuratorNotes, GameResult
 from .models.ghost import GhostResponse
 from .models.state import GameState
 from .agents import Curator, Ghost
 from .conversation import Conversation, Message, MessageRole, GhostRole
+from .utils import sanitize_ghost_speech
 
 class RuntimeConfig:
     curator_model: str = "gpt-4o-mini"
@@ -18,6 +19,19 @@ class RuntimeConfig:
     glitch_min_level: float = 1.5
     speech_min_wordlist_level: float = 3.0
     speech_min_sentence_level: float = 6.0
+    speech_max_wordlist_words: int = 3
+    speech_max_sentence_words: int = 5
+
+class CuratorActions:
+    new_activity_level: Optional[int] = None
+    new_primary_note: Optional[str] = None
+    new_secondary_note: Optional[str] = None
+    new_timer_value: Optional[float] = None
+    game_result: Optional[GameResult] = None
+
+class GhostActions:
+    glitch: bool = False
+    speech: List[str] | str | None = None
 
 class GameRuntime:
     def __init__(self, client: OpenAI, scenario: ScenarioDefinition, config: RuntimeConfig) -> Self:
@@ -65,16 +79,18 @@ class GameRuntime:
         else:
             print(f"WARN: Attempted to set curator note for invalid ghost entity type: {ghost}")
 
-    def __execute_curator(self, query, agent_choice) -> CuratorActionResponse:
+    def __execute_curator(self, query: str, agent_choice: GhostRole) -> CuratorActions:
         state = self.game_state
 
         response = self.curator.ask(
-            state=self.game_state,
+            state=state,
             conv=self.conversation,
             notes=self.curator_notes,
             query=query,
             ghost_turn=agent_choice
         )
+
+        actions = CuratorActions()
 
         primary_note = response.primary_ghost_note
         secondary_note = response.secondary_ghost_note
@@ -82,9 +98,11 @@ class GameRuntime:
         # Update ghost notes, also replacing "" with None
         if primary_note is not None:
             self.__set_ghost_note("primary", primary_note or None)
+            actions.new_primary_note = primary_note or None
 
         if secondary_note is not None:
             self.__set_ghost_note("secondary", secondary_note or None)
+            actions.new_secondary_note = secondary_note or None
 
         # Update activity level
         if response.activity_level is not None:
@@ -94,6 +112,7 @@ class GameRuntime:
                 print(f"WARN: Curator attempted to set invalid activity level: {activity_shift_str}")
             else:
                 state.activity_level = response.activity_level
+                actions.new_activity_level = response.activity_level
                 print(f"Curator set activity level to {response.activity_level}")
                 self.__push_message("curator", f"(updated activity level: {activity_shift_str})")
 
@@ -107,12 +126,57 @@ class GameRuntime:
                     f"added {response.timer_value} seconds to the scenario timer" if response.timer_value >= 0
                     else f"removed {abs(response.timer_value)} from the scenario timer"
                 )
+                actions.new_timer_value = state.get_remaining_time()
 
                 print(f"Curator {timer_shift_str}")
                 self.__push_message("curator", f"({timer_shift_str})")
 
-        return response
+        return actions
 
-    def __execute_ghost(self, query, agent_choice) -> bool:
-        pass
+    def __execute_ghost(self, query: str, agent_choice: GhostRole) -> GhostResponse:
+        if agent_choice == "primary":
+            model = self.primary_ghost
+            note = self.curator_notes.primary_ghost_note
+        elif agent_choice == "secondary":
+            model = self.secondary_ghost
+            note = self.curator_notes.secondary_ghost_note
+        else:
+            print("WARN: Invalid ghost model queued for execution")
+            return None
+        
+        config = self.config
+        state = self.game_state
+        response = model.ask(
+            state=state,
+            conv=self.conversation,
+            note=note,
+            query=query
+        )
 
+        actions = GhostActions()
+
+        # Process 
+        if response.glitch:
+            if state.activity_level < config.glitch_min_level:
+                print("WARN: Ghost attempted to glitch EMF, but it wasn't allowed to")
+            else:
+                self.__glitch()
+                actions.glitch = True
+                self.__push_message(Message(agent_choice, "(glitched the EMF and audio)"))
+        
+        # Process vocal response
+        if response.content:
+            max_words = (
+                config.speech_max_wordlist_words if isinstance(response.content, list) 
+                else config.speech_max_sentence_words
+            )
+
+            sanitized_content = sanitize_ghost_speech(response.content, max_words)
+            if isinstance(sanitized_content, str):
+                self.__push_message(Message(agent_choice, sanitized_content))
+            else:
+                self.__push_message(Message(agent_choice, ", ".join(sanitized_content)))
+
+            actions.speech = sanitized_content
+
+        return actions
