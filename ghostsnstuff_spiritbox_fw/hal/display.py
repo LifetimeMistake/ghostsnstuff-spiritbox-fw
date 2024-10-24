@@ -26,7 +26,7 @@ if isOnWin():
 
 if (isOnPi()):
     import st7735
-    import PIL
+    from PIL import Image, ImageDraw, ImageFont
     global disp
     disp = st7735.ST7735(port=0,cs=st7735.BG_SPI_CS_BACK,dc="GPIO9",backlight="GPIO12", rotation=90, spi_speed_hz=4000000)
     
@@ -47,6 +47,9 @@ _micActive = False
 _responseActive = False
 _noResponseActive = False
 _thinkingActive = False
+_sweep_enabled = False
+_raw_text = ""
+_text_string = ""
 
 def _tkDisplay():
     import PIL
@@ -70,6 +73,7 @@ if (isOnWin()):
         tklabel.pack()
     tkThread.start()
 _glitch_kill_event = threading.Event()
+_scroll_kill_event = threading.Event()
 def _glitchThread():
     while True:
         global _micActive
@@ -100,24 +104,29 @@ def _dispThread():
     while True:
         imgbuf = Image.new('RGB', (160, 80), color=(248, 133, 18))
         draw = ImageDraw.Draw(imgbuf)
-        if time.time() - previousMillis >= 0.1:
-            #advance sweep
-            frequency = frequency + advanceDirection
-            if frequency > 108:
-                frequency = 108
-                advanceDirection = -0.1
-            if frequency < 65:
-                frequency = 65
-                advanceDirection = 0.1
-            previousMillis = time.time()
-        if frequency < 100:
-            
-            freqtext = "    "+str(round(frequency, 1))+" FM"
+        draw.text((3, 45), "~.~.~.~.~.~.", (194, 117, 40), font)
+        if (_sweep_enabled == True):
+            if time.time() - previousMillis >= 0.1:
+                #advance sweep
+                frequency = frequency + advanceDirection
+                if frequency > 108:
+                    frequency = 108
+                    advanceDirection = -0.1
+                if frequency < 65:
+                    frequency = 65
+                    advanceDirection = 0.1
+                previousMillis = time.time()
+            if frequency < 100:
+                
+                freqtext = "    "+str(round(frequency, 1))+"FM"
+            else:
+                
+                freqtext = str(round(frequency, 1))+"FM"
+            draw.text((3, 45), freqtext, (0, 0, 0), font)
         else:
-            
-            freqtext = str(round(frequency, 1))+" FM"
-        draw.text((3, 45), freqtext, (0, 0, 0), font)
-            
+            draw.text((3, 45), _text_string, (0, 0, 0), font)
+            if (_text_string == ""):
+                draw.text((3, 45), "----FM", (0, 0, 0), font)    
 
         if _micActive == True:
             imgbuf.paste(micIcon, (3, 3))
@@ -143,13 +152,60 @@ def _dispThread():
         #draw.text((3, 40), "196.6 FM", (0, 0 ,0), font)
         _pushBuffer(imgbuf)
         time.sleep(0.05)
+
+def _scrolling_text_thread():
+    global _text_string
+    text = _raw_text.replace(' ', '    ')
+    scrollMillis = time.time()  # Initialize with the current time
+    start = 0
+    initial_wait = True  # Flag to handle the initial wait time
+
+    while True:
+        # Wait for 1 second at the start of scrolling
+        if initial_wait and time.time() - scrollMillis >= 1:
+            scrollMillis = time.time()  # Reset scrollMillis to the current time
+            initial_wait = False  # Disable initial wait after the first run
+
+        # Check if 0.2 seconds has passed for regular scrolling
+        elif not initial_wait and time.time() - scrollMillis >= 0.3:
+            # Calculate the end position
+            end = start + 6
+            if end > len(text):
+                start = 0  # Reset to the beginning if the end exceeds the text length
+                end = start + 6
+                initial_wait = True  # Enable initial wait when restarting
+                time.sleep(0.5)  # Wait for 0.5 seconds at the end
+
+            # Update the global text string
+            _text_string = text[start:end]
+            print(_text_string)  # Print the current segment
+
+            # Update the start position for the next iteration
+            start += 1
+
+            # Update the scrollMillis to the current time
+            scrollMillis = time.time()
+
+        # Check if the kill event is set
+        if _scroll_kill_event.is_set():
+            _text_string = text[0:6]
+            print("Scrolling stopped.")
+            return
+
+        # Sleep for a short time to prevent tight looping
+        time.sleep(0.05)
+
+
 dispGlitchThread = threading.Thread(target=_glitchThread)
+dispScrollThread = threading.Thread(target=_scrolling_text_thread)
 def _dispBegin():
     dispMainThread = threading.Thread(target=_dispThread)
     dispMainThread.start()
 
 class display(ABC):
     def begin(self, text):
+        pass
+    def sweep(self, enabled):
         pass
     def printText(self, text):
         pass
@@ -171,18 +227,38 @@ class display(ABC):
 class piDisplay(display):
     def begin(self):
         _dispBegin()
+    def sweep(self, enabled):
+        global _sweep_enabled
+        if (dispScrollThread.is_alive):
+            _scroll_kill_event.set()
+        global _text_string
+        global _raw_text
+        _text_string = ""
+        _raw_text = ""
+        _sweep_enabled = enabled
     def printText(self, text):
-        draw = ImageDraw.Draw(img)
-        #draw.rectangle((0, 20, 160, 40), (0, 0 ,0))
-        #draw.rectangle((3, 3, 40, 40), (255, 255,255))
+        # draw = ImageDraw.Draw(img)
+        # #draw.rectangle((0, 20, 160, 40), (0, 0 ,0))
+        # #draw.rectangle((3, 3, 40, 40), (255, 255,255))
         
-        img.paste(micDisabledIcon, (3, 3))
-        img.paste(thinkingDisabledIcon, (26+6, 3))
-        img.paste(noResponseIcon, (26+6+40+3, 3))
-        img.paste(responseDisabledIcon, (26+6+40+3+40+3, 3))
-        draw.text((3, 40), "196.6 FM", (0, 0, 0), font)
-        _pushBuffer(img)
+        # img.paste(micDisabledIcon, (3, 3))
+        # img.paste(thinkingDisabledIcon, (26+6, 3))
+        # img.paste(noResponseIcon, (26+6+40+3, 3))
+        # img.paste(responseDisabledIcon, (26+6+40+3+40+3, 3))
+        # draw.text((3, 40), "196.6 FM", (0, 0, 0), font)
+        # _pushBuffer(img)
         #_pushBuffer(image)
+        if (not _scroll_kill_event.is_set):
+            if (dispScrollThread.is_alive):
+                _scroll_kill_event.set()
+                time.sleep(0.05)
+                _scroll_kill_event.clear()
+        else:
+            _scroll_kill_event.clear()
+        global _raw_text
+        _raw_text = text
+        dispScrollThread.start()
+        
     def micIcon(self ,enable):
         global _micActive
         _micActive = enable
