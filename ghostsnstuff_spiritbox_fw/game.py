@@ -1,3 +1,4 @@
+from random import random
 from openai import OpenAI
 from typing import Self, Optional, List
 from .scenario import ScenarioDefinition
@@ -6,7 +7,7 @@ from .models.ghost import GhostResponse
 from .models.state import GameState
 from .agents import Curator, Ghost
 from .conversation import Conversation, Message, MessageRole, GhostRole
-from .utils import sanitize_ghost_speech
+from .utils import sanitize_ghost_speech, weighted_ghost_choice
 
 class RuntimeConfig:
     curator_model: str = "gpt-4o-mini"
@@ -28,10 +29,18 @@ class CuratorActions:
     new_secondary_note: Optional[str] = None
     new_timer_value: Optional[float] = None
     game_result: Optional[GameResult] = None
+    corrected_user_prompt: Optional[str] = None
 
 class GhostActions:
     glitch: bool = False
     speech: List[str] | str | None = None
+    
+class RuntimeExecutionResult:
+    curator_actions: CuratorActions
+    primary_ghost_actions: Optional[GhostActions]
+    secondary_ghost_actions: Optional[GhostActions]
+    activity_level: float
+    game_result: Optional[GameResult]
 
 class GameRuntime:
     def __init__(self, client: OpenAI, scenario: ScenarioDefinition, config: RuntimeConfig) -> Self:
@@ -130,6 +139,11 @@ class GameRuntime:
 
                 print(f"Curator {timer_shift_str}")
                 self.__push_message("curator", f"({timer_shift_str})")
+                
+        # Update user query
+        if response.user_prompt_correction is not None:
+            print(f"Curator corrected user query to {response.user_prompt_correction}")
+            actions.corrected_user_prompt = response.user_prompt_correction
 
         return actions
 
@@ -180,3 +194,45 @@ class GameRuntime:
             actions.speech = sanitized_content
 
         return actions
+    
+    def execute(self, query: str) -> RuntimeExecutionResult:
+        state = self.game_state
+        self.__push_message("user", query)
+        agent_choice = weighted_ghost_choice(state.activity_level)
+        execution_result = RuntimeExecutionResult()
+        
+        curator_run = self.__execute_curator(query, agent_choice)
+        if curator_run.corrected_user_prompt:
+            # Hacky solution to fix this thing
+            for message in reversed(self.conversation.history):
+                if message.role != "user":
+                    break
+                if message.content != query:
+                    print(f"WARN: Failed to apply curator correction because the queries were mismatched: expected '{query}' found '{message.content}'")
+                    break
+                message.content = curator_run.corrected_user_prompt
+                query = curator_run.corrected_user_prompt
+                break
+            
+        if curator_run.game_result:
+            # End the iteration early
+            execution_result.game_result = curator_run.game_result
+            return execution_result
+        
+        execution_result.curator_actions = curator_run
+        if agent_choice == "primary":
+            execution_result.primary_ghost_actions = self.__execute_ghost(query, agent_choice)
+        elif agent_choice == "secondary":
+            execution_result.secondary_ghost_actions = self.__execute_ghost(query, agent_choice)
+        elif agent_choice == "both":
+            order = random.choice([True, False])
+            if order:
+                execution_result.primary_ghost_actions = self.__execute_ghost(query, "primary")
+                execution_result.secondary_ghost_actions = self.__execute_ghost(query, "secondary")
+            else:
+                execution_result.primary_ghost_actions = self.__execute_ghost(query, "secondary")
+                execution_result.secondary_ghost_actions = self.__execute_ghost(query, "primary")
+        
+        state.increment_activity()
+        execution_result.activity_level = state.activity_level
+        return execution_result
