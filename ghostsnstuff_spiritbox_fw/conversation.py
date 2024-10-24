@@ -1,7 +1,10 @@
 from typing import Literal, Optional
 
+GhostRole = Literal["primary", "secondary"]
+MessageRole = GhostRole | Literal["user", "curator"]
+
 class Message:
-    def __init__(self, role: Literal["user"] | Literal["primary"] | Literal["secondary"] | Literal["curator"], content: str):
+    def __init__(self, role: MessageRole, content: str):
         self.role = role
         self.content = content
 
