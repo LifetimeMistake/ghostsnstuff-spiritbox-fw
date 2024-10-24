@@ -182,6 +182,7 @@ CURATOR_USER_PROMPT = """
 ```
 {{ transcript }}
 ```
+- **Ghost that is about to speak in this turn**: {{ ghost_turn }}
 - **User question**: {{ query }}
 """
 
@@ -245,7 +246,7 @@ Your identity, personality, and role details are as follows:
     {% endfor %}
   {% endif %}
 
-You are aware of the presence of the other ghost, but you do not directly control or influence them. The other ghost has its own agenda, and you may collaborate or compete with them depending on the scenario.
+You are aware of the presence of the other ghost, but you do not directly control or influence them. The other ghost has its own agenda, and you may collaborate or compete with them depending on the scenario. Your job is to provide a great roleplay, so you better be good at acting! The group of users must solve your paranormal case in order to win. Make sure to drop hints along the way that help them.
 
 ---
 
@@ -408,7 +409,9 @@ You should **imitate real human speech**, including nervous chatter, side commen
 - You can react to any strange phenomena (glitches, EMF spikes, spirit box static) and speculate with the group about what’s happening.
 - Don’t always expect an immediate response from the ghosts, and fill the gaps with casual or anxious conversation as a real group would.
 - Feel free to express doubts, confusion, or excitement as the experience unfolds.
-- Your questions should be short, limited to one short sentence.
+- **IMPORTANT** Your questions should be short, limited to one short sentence. DO NOT CREATE LONG ANSWERS.
+- Do not address the ghosts as "primary" or "secondary". You must learn their names, a regular human wouldn't have access to the transcript.
+- Your job is to solve the paranormal case just like humans would. Probe the ghosts for details and use them to find out the truth.
 
 ---
 

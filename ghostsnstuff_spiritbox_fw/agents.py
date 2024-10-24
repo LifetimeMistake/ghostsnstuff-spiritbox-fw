@@ -49,11 +49,12 @@ class Curator:
             prompt=rendered_prompt
         )
 
-    def ask(self, state: GameState, conv: Conversation, notes: CuratorNotes, query: str) -> CuratorActionResponse:
+    def ask(self, state: GameState, conv: Conversation, notes: CuratorNotes, query: str, ghost_turn: str) -> CuratorActionResponse:
         prompt = self.query_tpl.render(
             game_state=state,
             transcript=str(conv),
             curator_notes=notes,
+            ghost_turn=ghost_turn,
             query=query
         )
 
