@@ -15,6 +15,7 @@ vad = webrtcvad.Vad(audef.mic_vad_mode)
 
 # Circular buffer for 1 second audio
 circular_buffer = collections.deque(maxlen=audef.mic_circular_buffer_size)
+_iconCallback = None
 
 # Lock for synchronization
 _buffer_lock = threading.Lock()
@@ -52,6 +53,8 @@ def _vad():
 
         if is_speech:
             print("is speech")
+            if (_iconCallback is not None):
+                _iconCallback(True)
             num_voiced_frames += 1
             num_unvoiced_frames = 0
 
@@ -62,6 +65,8 @@ def _vad():
                     _result_buffer = np.append(np.array(circular_buffer, dtype=np.int16), _result_buffer)
         else:
             print("is not speech")
+            if (_iconCallback is not None):
+                _iconCallback(False)
             if _recording_event.is_set():
                 num_unvoiced_frames += 1
                 if num_unvoiced_frames >= required_unvoiced_frames:
@@ -97,7 +102,17 @@ def _awaitBuffer():
 class microphone(ABC):
     def awaitBuffer(self):
         pass
+    def registerIconCallback(self, callback):
+        pass
+    def unregisterIconCallback(self):
+        pass
 
 class piMic(microphone):
     def awaitBuffer(self):
         return _awaitBuffer()
+    def registerIconCallback(self, callback):
+        global _iconCallback
+        _iconCallback = callback
+    def unregisterIconCallback(self):
+        global _iconCallback
+        _iconCallback = None
