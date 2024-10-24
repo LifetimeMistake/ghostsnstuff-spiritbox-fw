@@ -12,7 +12,7 @@ __stop_interference = 1
 static1 = None
 def __load_static_files():
     global static1
-    rate, static1 = wavfile.read('brat.wav')
+    rate, static1 = wavfile.read("./ghostsnstuff_spiritbox_fw/hal/audio/interference_level1_2.wav")
 
 def __play_numpy_buffer_thread(buffer, sample_rate, channels, chunk_size):
     if buffer.ndim > 1:
@@ -36,7 +36,7 @@ def __play_numpy_buffer_thread(buffer, sample_rate, channels, chunk_size):
     stream.close()
 
 def __simulate_interferance_thread():
-    pass    
+    __play_numpy_buffer_thread()    
 
 def __setInterference(value):
     if (value == 0):
