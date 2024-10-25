@@ -7,6 +7,7 @@ from .models.ghost import GhostResponse
 from .models.state import GameState
 from .agents import Curator, Ghost
 from . import logging
+from .events import Event, EventTimeline, EventActor
 from .conversation import Conversation, Message, MessageRole, GhostRole
 from .utils import sanitize_ghost_speech, weighted_ghost_choice
 
@@ -43,10 +44,39 @@ class RuntimeExecutionResult:
     activity_level: float
     game_result: Optional[GameResult]
 
+class GhostCallEvent(Event):
+    def __init__(self, actor: EventActor, ghost_call: GhostActions):
+        super().__init__(actor, "ghost_call")
+        self.used_glitch = ghost_call.glitch
+        self.speech = ghost_call.speech
+
+    def to_dict(self):
+        return {
+            **super().to_dict(),
+            "used_glitch": self.used_glitch,
+            "speech": ", ".join(self.speech) if isinstance(self.speech, list) else self.speech
+        }
+    
+class CuratorCallEvent(Event):
+    def __init__(self, actor: EventActor, curator_call: CuratorActions):
+        super().__init__(actor, "curator_call")
+        self.data = curator_call
+    
+    def to_dict(self):
+        return {
+            **super().to_dict(),
+            "new_primary_note": self.data.new_primary_note,
+            "new_secondary_note": self.data.new_secondary_note,
+            "new_activity_level": self.data.new_activity_level,
+            "new_timer_value": self.data.new_timer_value,
+            "game_result": self.data.game_result
+        }
+
 class GameRuntime:
-    def __init__(self, client: OpenAI, scenario: ScenarioDefinition, config: RuntimeConfig) -> Self:
+    def __init__(self, client: OpenAI, scenario: ScenarioDefinition, config: RuntimeConfig, timeline: EventTimeline) -> Self:
         self.config = config
         self.scenario = scenario
+        self.events = timeline
         self.conversation = Conversation()
         self.curator_notes = CuratorNotes()
         self.curator = Curator(
@@ -146,6 +176,7 @@ class GameRuntime:
             logging.print(f"Curator corrected user query to {response.user_prompt_correction}")
             actions.corrected_user_prompt = response.user_prompt_correction
 
+        self.events.push(CuratorCallEvent("Curator", actions))
         return actions
 
     def __execute_ghost(self, query: str, agent_choice: GhostRole) -> GhostResponse:
@@ -194,6 +225,7 @@ class GameRuntime:
 
             actions.speech = sanitized_content
 
+        self.events.push(GhostCallEvent(agent_choice.capitalize(), actions))
         return actions
     
     def execute(self, query: str) -> RuntimeExecutionResult:
@@ -235,5 +267,6 @@ class GameRuntime:
                 execution_result.secondary_ghost_actions = self.__execute_ghost(query, "primary")
         
         state.increment_activity()
+        logging.info(f"Activity level is now {state.activity_level}")
         execution_result.activity_level = state.activity_level
         return execution_result

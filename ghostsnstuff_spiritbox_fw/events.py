@@ -1,4 +1,5 @@
 from typing import Self, Literal, List, Dict, Any
+from datetime import datetime
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -6,11 +7,13 @@ EventActor = Literal["System", "Primary", "Secondary", "Curator"]
 
 class Event:
     def __init__(self, actor: EventActor, type: str) -> Self:
+        self.timestamp = datetime.now()
         self.actor = actor
         self.type = type
 
     def to_dict(self) -> Dict[str, Any]:
         return {
+            "timestamp": self.timestamp,
             "actor": self.actor,
             "type": self.type
         }
