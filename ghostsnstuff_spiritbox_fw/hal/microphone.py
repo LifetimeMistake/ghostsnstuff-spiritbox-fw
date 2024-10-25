@@ -5,6 +5,7 @@ import collections
 import threading
 import time
 from . import audio_define as audef
+#import ghostsnstuff_spiritbox_fw.hal.audio_define as audef
 from abc import ABC
 # Constants
 

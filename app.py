@@ -57,7 +57,6 @@ logging.print("Init OK")
 logging.print("Starting scenario")
 
 ###### Run main loop
-runtime.game_state.reset()
 
 PRIMARY_GHOST_VOICE = "onyx"
 SECONDARY_GHOST_VOICE = "nova"
@@ -70,12 +69,11 @@ def get_buffer_length(buffer, sample_rate, num_channels):
 def handle_ghost_actions(actions, voice):
     emf.glitch()
     if actions.glitch:
-        spk.setInterference(3)
-        emf.glitch()
         disp.glitch(True)
+        spk.setInterference(2)
+        emf.glitch()
         time.sleep(0.5)
         disp.glitch(False)
-        spk.setInterference(1)
         pass
     if not actions.speech:
 
@@ -100,13 +98,15 @@ def handle_ghost_actions(actions, voice):
 
 def win_condition():
     spk.setInterference(3)
+    disp.glitch(True)
     emf.set_activity(6)
     time.sleep(5)
     for i in range(5):
         emf.set_activity(5 - i)
         time.sleep(1)
-
+    time.sleep(2)
     emf.set_activity(0)
+    disp.glitch(False)
     spk.setInterference(0)
     disp.sweep(False)
     time.sleep(3)
@@ -118,6 +118,7 @@ def win_condition():
 def lose_condition():
     buffer = tts.synthesize("Głupcze...", "onyx", 0.5)
     spk.setInterference(3)
+    disp.glitch(True)
     emf.set_activity(6)
     time.sleep(2)
     disp.glitch(True)
@@ -127,10 +128,11 @@ def lose_condition():
 
     time.sleep(2)
     spk.playBuffer(buffer, 16000)
-    time.sleep(3)
+    time.sleep(5)
     disp.sweep(False)
     emf.set_activity(0)
     spk.setInterference(0)
+    disp.glitch(False)
 
 while True:
     disp.sweep(True)
