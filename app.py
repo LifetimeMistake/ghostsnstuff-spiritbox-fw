@@ -37,8 +37,8 @@ runtime = GameRuntime(
 ###### Initialize HAL
 emf_driver = EMFDriver()
 
-logging.info("Init OK")
-logging.info("Starting scenario")
+logging.print("Init OK")
+logging.print("Starting scenario")
 
 ###### Run main loop
 runtime.game_state.reset()
