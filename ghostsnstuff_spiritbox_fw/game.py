@@ -41,6 +41,7 @@ class RuntimeExecutionResult:
     curator_actions: CuratorActions
     primary_ghost_actions: Optional[GhostActions]
     secondary_ghost_actions: Optional[GhostActions]
+    ghost_order: str
     activity_level: float
     game_result: Optional[GameResult]
 
@@ -254,18 +255,23 @@ class GameRuntime:
         
         execution_result.curator_actions = curator_run
         if agent_choice == "primary":
+            ghost_order = "primary"
             execution_result.primary_ghost_actions = self.__execute_ghost(query, agent_choice)
         elif agent_choice == "secondary":
+            ghost_order = "secondary"
             execution_result.secondary_ghost_actions = self.__execute_ghost(query, agent_choice)
         elif agent_choice == "both":
             order = random.choice([True, False])
             if order:
+                ghost_order = "primary"
                 execution_result.primary_ghost_actions = self.__execute_ghost(query, "primary")
                 execution_result.secondary_ghost_actions = self.__execute_ghost(query, "secondary")
             else:
+                ghost_order = "secondary"
                 execution_result.primary_ghost_actions = self.__execute_ghost(query, "secondary")
                 execution_result.secondary_ghost_actions = self.__execute_ghost(query, "primary")
         
+        execution_result.ghost_order = ghost_order
         state.increment_activity()
         logging.info(f"Activity level is now {state.activity_level}")
         execution_result.activity_level = state.activity_level
