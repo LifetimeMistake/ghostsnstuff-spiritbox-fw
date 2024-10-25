@@ -12,6 +12,7 @@ class TTSClient:
         self.client = client
 
     def synthesize(self, content: str, voice_model: str, speed: float = 1.0) -> np.ndarray:
+        print(content)
         response = self.client.audio.speech.create(
             model="tts-1",
             voice=voice_model,
@@ -27,6 +28,8 @@ class TTSClient:
 
     def synthesize_batch(self, content: list[str], voice_model: str, speed: float = 1.0) -> list[np.ndarray]:
         return [self.synthesize(text, voice_model, speed) for text in content]
+
+
 
 def numpy_to_wav(buffer, sample_rate):
     pcm_int16 = np.int16(buffer * 32767)

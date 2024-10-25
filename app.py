@@ -51,6 +51,7 @@ spk = getSpeaker()
 mic = getMic()
 
 disp.begin()
+spk.begin()
 mic.registerIconCallback(disp.micIcon)
 
 logging.print("Init OK")
@@ -61,6 +62,14 @@ logging.print("Starting scenario")
 PRIMARY_GHOST_VOICE = "onyx"
 SECONDARY_GHOST_VOICE = "nova"
 VOICE_SPEED = 0.75
+
+def polish_to_english(text):
+    polishenglish = str.maketrans(
+        "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ",
+        "acelnoszzACELNOSZZ"
+    )
+    return text.translate(polishenglish)
+
 
 def get_buffer_length(buffer, sample_rate, num_channels):
     num_samples = buffer.size
@@ -81,19 +90,27 @@ def handle_ghost_actions(actions, voice):
     if isinstance(actions.speech, list):
         buffers = tts.synthesize_batch(actions.speech, voice, 0.75)
         for word, buffer in zip(actions.speech, buffers):
+            print("PLAYING MULTIPLE")
+            disp.printText(polish_to_english(word))
             spk.playBuffer(buffer, 16000)
             disp.responseIcon(True)
-            time.sleep(1.5)
-            disp.printText(word)
-            time.sleep(get_buffer_length(buffer, 16000, 1)-1.5)
+            #time.sleep(1.5)
+            buffer_lenght = get_buffer_length(buffer, 16000 ,1)
+            time.sleep(max(0, buffer_lenght))
+            if buffer_lenght < 2:
+                time.sleep(2-buffer_lenght)
             disp.responseIcon(False)
     else:
         buffer = tts.synthesize(actions.speech, voice, 0.75)
+        print("PLAYING ONE")
         spk.playBuffer(buffer, 16000)
         disp.responseIcon(True)
-        time.sleep(1)
+        #time.sleep(1)
         disp.printText("XXXXXX")
-        time.sleep(get_buffer_length(buffer, 16000, 1)-1)
+        buffer_lenght = get_buffer_length(buffer, 16000 ,1)
+        time.sleep(max(0, buffer_lenght))
+        if buffer_lenght < 2:
+            time.sleep(2-buffer_lenght)
         disp.responseIcon(False)
 
 def win_condition():
@@ -105,7 +122,7 @@ def win_condition():
         emf.set_activity(5 - i)
         time.sleep(1)
     time.sleep(2)
-    emf.set_activity(0)
+   #emf.set_activity(0)
     disp.glitch(False)
     spk.setInterference(0)
     disp.sweep(False)
@@ -133,11 +150,12 @@ def lose_condition():
     emf.set_activity(0)
     spk.setInterference(0)
     disp.glitch(False)
-
 while True:
     disp.sweep(True)
-    user_query = stt.transcribe(mic.awaitBuffer(), 16000)
+    buffer = mic.awaitBuffer()
     disp.thinkingIcon(True)
+    user_query = stt.transcribe(buffer, 16000)
+    print(user_query)
     turn_result = runtime.execute(user_query)
     disp.thinkingIcon(False)
 

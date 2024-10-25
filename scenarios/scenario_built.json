@@ -1,7 +1,6 @@
 {
-    "scenario": {
       "scenario_type": "Evil Primary Spirit and Supportive Secondary Spirit",
-      "scenario_description": "A group of ghost hunters in the village of Krośnica unknowingly summons two spirits: a malevolent one and a benevolent one. They must identify and banish the evil spirit to restore peace.",
+      "scenario_description": "A group of ghost hunters in the village of Krośnica unknowingly summons two spirits: a malevolent one and a benevolent one. They must identify and banish the evil spirit to restore peace. The ghost shall only speak polish",
       "primary_ghost": {
         "name": "Kazimierz",
         "personality": "Złośliwy, manipulujący, i przekonujący.",
@@ -59,6 +58,6 @@
           "phrase": "Światło ujawnia prawdę cieni."
         }
       }
-    },
-    "reasoning": "In this scenario, the primary ghost Kazimierz is designed to be manipulative and deceitful, playing on the group's desire to achieve their goals by pretending to be helpful. His background as a cruel landowner ties into his motivations for revenge, making him a credible threat. On the other hand, Zofia, the supportive ghost, offers subtle guidance and warnings, aiming to help the group see through Kazimierz's deception. Her backstory as a victim of Kazimierz adds depth to her character, making her a sympathetic ally. The scenario is set in a small Polish village, and the use of Polish language for the ghosts' interactions and rituals adds authenticity and immersion for the participants. The final goal involves piecing together Zofia's hints to perform a banishing ritual, creating a clear path for the group to follow and succeed."
+    ,
+    "reasoning": "In this scenario, the primary ghost Kazimierz is designed to be manipulative and deceitful, playing on the group's desire to achieve their goals by pretending to be helpful. His background as a cruel landowner ties into his motivations for revenge, making him a credible threat. On the other hand, Zofia, the supportive ghost, offers subtle guidance and warnings, aiming to help the group see through Kazimierz's deception. Her backstory as a victim of Kazimierz adds depth to her character, making her a sympathetic ally. The scenario is set in a small Polish village, and the use of Polish language for the ghosts' interactions and rituals adds authenticity and immersion for the participants. The final goal involves piecing together Zofia's hints to perform a banishing ritual, creating a clear path for the group to follow and succeed. The ghosts shall only speak polish"
   }

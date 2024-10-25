@@ -13,6 +13,10 @@ __stop_interference = 1
 
 static1 = None
 static2 = None
+static3 = None
+beep1 = None
+beep2 = None
+beep3 = None
 beep1 = None
 def _load_static_files():
     global static1, beep1, static3, static2, beep2, beep3
@@ -24,8 +28,8 @@ def _load_static_files():
     rate, beep3 = wavfile.read("./ghostsnstuff_spiritbox_fw/hal/audio/beep3.wav")
 interference_value = 1
 def __play_numpy_buffer_thread(buffer, sample_rate, channels, chunk_size):
-    if buffer.ndim > 1:
-        buffer = buffer.mean(axis=1)
+    # if buffer.ndim > 1:
+    #     buffer = buffer.mean(axis=1)
     stream = pa.open(format=audef.speaker_pa_format, channels=channels, rate=sample_rate, output=True, frames_per_buffer=audef.speaker_chunk_size)
     buffer = buffer.astype(audef.speaker_np_format)
     max_val = np.max(np.abs(buffer))

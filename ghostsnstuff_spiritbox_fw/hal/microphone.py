@@ -39,8 +39,8 @@ def _vad():
     global _result_buffer
     num_voiced_frames = 0
     num_unvoiced_frames = 0
-    required_voiced_frames = 10
-    required_unvoiced_frames = 20
+    required_voiced_frames = 30
+    required_unvoiced_frames = 50
 
     while True:
         time.sleep(audef.mic_frame_duration_ms / 1000.0)

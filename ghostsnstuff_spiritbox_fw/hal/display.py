@@ -159,15 +159,18 @@ def _scrolling_text_thread():
     scrollMillis = time.time()  # Initialize with the current time
     start = 0
     initial_wait = True  # Flag to handle the initial wait time
+    global _sweep_enabled
+    _sweep_enabled = False
+    _text_string = text[0:6]
 
     while True:
         # Wait for 1 second at the start of scrolling
-        if initial_wait and time.time() - scrollMillis >= 1:
+        if initial_wait and time.time() - scrollMillis >= 0.5:
             scrollMillis = time.time()  # Reset scrollMillis to the current time
             initial_wait = False  # Disable initial wait after the first run
 
         # Check if 0.2 seconds has passed for regular scrolling
-        elif not initial_wait and time.time() - scrollMillis >= 0.3:
+        elif not initial_wait and time.time() - scrollMillis >= 0.10:
             # Calculate the end position
             end = start + 6
             if end > len(text):
@@ -178,7 +181,7 @@ def _scrolling_text_thread():
 
             # Update the global text string
             _text_string = text[start:end]
-            print(_text_string)  # Print the current segment
+            #print(_text_string)  # Print the current segment
 
             # Update the start position for the next iteration
             start += 1
@@ -193,11 +196,10 @@ def _scrolling_text_thread():
             return
 
         # Sleep for a short time to prevent tight looping
-        time.sleep(0.05)
 
 
-dispGlitchThread = threading.Thread(target=_glitchThread)
-dispScrollThread = threading.Thread(target=_scrolling_text_thread)
+
+
 def _dispBegin():
     dispMainThread = threading.Thread(target=_dispThread)
     dispMainThread.start()
@@ -229,8 +231,8 @@ class piDisplay(display):
         _dispBegin()
     def sweep(self, enabled):
         global _sweep_enabled
-        if (dispScrollThread.is_alive):
-            _scroll_kill_event.set()
+
+        _scroll_kill_event.set()
         global _text_string
         global _raw_text
         _text_string = ""
@@ -248,13 +250,16 @@ class piDisplay(display):
         # draw.text((3, 40), "196.6 FM", (0, 0, 0), font)
         # _pushBuffer(img)
         #_pushBuffer(image)
+        _scroll_kill_event.set()
+        time.sleep(0.1)
+        dispScrollThread = threading.Thread(target=_scrolling_text_thread)
         if (not _scroll_kill_event.is_set):
-            if (dispScrollThread.is_alive):
-                _scroll_kill_event.set()
-                time.sleep(0.05)
-                _scroll_kill_event.clear()
+            _scroll_kill_event.set()
+            time.sleep(0.05)
+            _scroll_kill_event.clear()
         else:
             _scroll_kill_event.clear()
+        _scroll_kill_event.clear()
         global _raw_text
         _raw_text = text
         dispScrollThread.start()
@@ -272,9 +277,12 @@ class piDisplay(display):
         global _thinkingActive
         _thinkingActive = enable
     def glitch(self, enable):
-        if enable == True:
+        dispGlitchThread = threading.Thread(target=_glitchThread)
+        if enable == True and not dispGlitchThread.is_alive():
+            _glitch_kill_event.set()
+            time.sleep(0.1)
             _glitch_kill_event.clear()
-            dispGlitchThread.start()
+            #dispGlitchThread.start()
         else:
             if dispGlitchThread.is_alive() and not _glitch_kill_event.is_set():
                 _glitch_kill_event.set()

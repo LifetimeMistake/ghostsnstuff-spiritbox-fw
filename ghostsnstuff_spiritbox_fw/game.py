@@ -234,9 +234,9 @@ class GameRuntime:
             if state.activity_level < config.glitch_min_level:
                 logging.warn("Ghost attempted to glitch EMF, but it wasn't allowed to")
             else:
-                self.__glitch()
+                #self.__glitch()
                 actions.glitch = True
-                self.__push_message(Message(agent_choice, "(glitched the EMF and audio)"))
+                self.__push_message(agent_choice, "(glitched the EMF and audio)")
         
         # Process vocal response
         if response.content:
@@ -247,9 +247,9 @@ class GameRuntime:
 
             sanitized_content = sanitize_ghost_speech(response.content, max_words)
             if isinstance(sanitized_content, str):
-                self.__push_message(Message(agent_choice, sanitized_content))
+                self.__push_message(agent_choice, sanitized_content)
             else:
-                self.__push_message(Message(agent_choice, ", ".join(sanitized_content)))
+                self.__push_message(agent_choice, ", ".join(sanitized_content))
 
             actions.speech = sanitized_content
 

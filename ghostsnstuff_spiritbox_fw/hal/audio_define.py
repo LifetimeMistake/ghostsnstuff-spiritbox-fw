@@ -19,5 +19,5 @@ mic_frame_duration_ms = 30
 mic_frame_size = int(mic_sample_rate * (mic_frame_duration_ms / 1000))
 mic_circular_buffer_size = mic_sample_rate * 1
 mic_vad_mode = 3
-mic_req_voiced_frames = 10 # required amount of audio frames for vad to trigger/untrigger
-mic_req_unvoiced_frames = 20
+#mic_req_voiced_frames = 10 # required amount of audio frames for vad to trigger/untrigger
+#mic_req_unvoiced_frames = 20
