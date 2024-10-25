@@ -6,6 +6,8 @@ from .models.curator import CuratorNotes, GameResult
 from .models.ghost import GhostResponse
 from .models.state import GameState
 from .agents import Curator, Ghost
+from . import logging
+from .events import Event, EventTimeline, EventActor
 from .conversation import Conversation, Message, MessageRole, GhostRole
 from .utils import sanitize_ghost_speech, weighted_ghost_choice
 
@@ -30,22 +32,77 @@ class CuratorActions:
     new_timer_value: Optional[float] = None
     game_result: Optional[GameResult] = None
     corrected_user_prompt: Optional[str] = None
+    reasoning: str
 
 class GhostActions:
     glitch: bool = False
     speech: List[str] | str | None = None
+    reasoning: str
     
 class RuntimeExecutionResult:
     curator_actions: CuratorActions
     primary_ghost_actions: Optional[GhostActions]
     secondary_ghost_actions: Optional[GhostActions]
+    ghost_order: str
     activity_level: float
     game_result: Optional[GameResult]
 
+class SystemCallResult:
+    curator_actions: CuratorActions
+    curator_response: str
+
+class GhostCallEvent(Event):
+    def __init__(self, actor: EventActor, ghost_call: GhostActions):
+        super().__init__(actor, "ghost_call")
+        self.used_glitch = ghost_call.glitch
+        self.speech = ghost_call.speech
+
+    def to_dict(self):
+        return {
+            **super().to_dict(),
+            "used_glitch": self.used_glitch,
+            "speech": ", ".join(self.speech) if isinstance(self.speech, list) else self.speech
+        }
+    
+class CuratorCallEvent(Event):
+    def __init__(self, actor: EventActor, curator_call: CuratorActions):
+        super().__init__(actor, "curator_call")
+        self.data = curator_call
+    
+    def to_dict(self):
+        return {
+            **super().to_dict(),
+            "new_primary_note": self.data.new_primary_note,
+            "new_secondary_note": self.data.new_secondary_note,
+            "new_activity_level": self.data.new_activity_level,
+            "new_timer_value": self.data.new_timer_value,
+            "game_result": self.data.game_result
+        }
+
+class SystemCallEvent(Event):
+    def __init__(self, query: str, system_actions: SystemCallResult):
+        super().__init__("System", "system_call")
+        self.query = query
+        self.data = system_actions.curator_actions
+        self.response = system_actions.curator_response
+
+    def to_dict(self):
+        return {
+            **super().to_dict(),
+            "new_primary_note": self.data.new_primary_note,
+            "new_secondary_note": self.data.new_secondary_note,
+            "new_activity_level": self.data.new_activity_level,
+            "new_timer_value": self.data.new_timer_value,
+            "game_result": self.data.game_result,
+            "system_query": self.query,
+            "system_response": self.response
+        }
+
 class GameRuntime:
-    def __init__(self, client: OpenAI, scenario: ScenarioDefinition, config: RuntimeConfig) -> Self:
+    def __init__(self, client: OpenAI, scenario: ScenarioDefinition, config: RuntimeConfig, timeline: EventTimeline) -> Self:
         self.config = config
         self.scenario = scenario
+        self.events = timeline
         self.conversation = Conversation()
         self.curator_notes = CuratorNotes()
         self.curator = Curator(
@@ -86,7 +143,7 @@ class GameRuntime:
         elif ghost == "secondary":
             notes.secondary_ghost_note = note
         else:
-            print(f"WARN: Attempted to set curator note for invalid ghost entity type: {ghost}")
+            logging.warn(f"Attempted to set curator note for invalid ghost entity type: {ghost}")
 
     def __execute_curator(self, query: str, agent_choice: GhostRole) -> CuratorActions:
         state = self.game_state
@@ -100,6 +157,7 @@ class GameRuntime:
         )
 
         actions = CuratorActions()
+        actions.reasoning = response.action_reasoning
 
         primary_note = response.primary_ghost_note
         secondary_note = response.secondary_ghost_note
@@ -118,17 +176,17 @@ class GameRuntime:
             delta_activity = state.activity_level - response.activity_level
             activity_shift_str = f"{state.activity_level}->{response.activity_level}"
             if abs(delta_activity) > 1:
-                print(f"WARN: Curator attempted to set invalid activity level: {activity_shift_str}")
+                logging.warn(f"Curator attempted to set invalid activity level: {activity_shift_str}")
             else:
                 state.activity_level = response.activity_level
                 actions.new_activity_level = response.activity_level
-                print(f"Curator set activity level to {response.activity_level}")
+                logging.print(f"Curator set activity level to {response.activity_level}")
                 self.__push_message("curator", f"(updated activity level: {activity_shift_str})")
 
         # Update game timer
         if response.timer_value is not None:
             if state.get_remaining_time() == -1:
-                print("WARN: Curator attempted to set timer when scenario didn't include one")
+                logging.warn("Curator attempted to set timer when scenario didn't include one")
             else:
                 state.timer += response.timer_value
                 timer_shift_str = (
@@ -137,14 +195,15 @@ class GameRuntime:
                 )
                 actions.new_timer_value = state.get_remaining_time()
 
-                print(f"Curator {timer_shift_str}")
+                logging.print(f"Curator {timer_shift_str}")
                 self.__push_message("curator", f"({timer_shift_str})")
                 
         # Update user query
         if response.user_prompt_correction is not None:
-            print(f"Curator corrected user query to {response.user_prompt_correction}")
+            logging.print(f"Curator corrected user query to {response.user_prompt_correction}")
             actions.corrected_user_prompt = response.user_prompt_correction
 
+        self.events.push(CuratorCallEvent("Curator", actions))
         return actions
 
     def __execute_ghost(self, query: str, agent_choice: GhostRole) -> GhostResponse:
@@ -155,7 +214,7 @@ class GameRuntime:
             model = self.secondary_ghost
             note = self.curator_notes.secondary_ghost_note
         else:
-            print("WARN: Invalid ghost model queued for execution")
+            logging.warn("Invalid ghost model queued for execution")
             return None
         
         config = self.config
@@ -168,11 +227,12 @@ class GameRuntime:
         )
 
         actions = GhostActions()
+        actions.reasoning = response.reasoning
 
         # Process 
         if response.glitch:
             if state.activity_level < config.glitch_min_level:
-                print("WARN: Ghost attempted to glitch EMF, but it wasn't allowed to")
+                logging.warn("Ghost attempted to glitch EMF, but it wasn't allowed to")
             else:
                 self.__glitch()
                 actions.glitch = True
@@ -193,6 +253,7 @@ class GameRuntime:
 
             actions.speech = sanitized_content
 
+        self.events.push(GhostCallEvent(agent_choice.capitalize(), actions))
         return actions
     
     def execute(self, query: str) -> RuntimeExecutionResult:
@@ -208,7 +269,7 @@ class GameRuntime:
                 if message.role != "user":
                     break
                 if message.content != query:
-                    print(f"WARN: Failed to apply curator correction because the queries were mismatched: expected '{query}' found '{message.content}'")
+                    logging.warn(f"Failed to apply curator correction because the queries were mismatched: expected '{query}' found '{message.content}'")
                     break
                 message.content = curator_run.corrected_user_prompt
                 query = curator_run.corrected_user_prompt
@@ -221,18 +282,44 @@ class GameRuntime:
         
         execution_result.curator_actions = curator_run
         if agent_choice == "primary":
+            ghost_order = "primary"
             execution_result.primary_ghost_actions = self.__execute_ghost(query, agent_choice)
         elif agent_choice == "secondary":
+            ghost_order = "secondary"
             execution_result.secondary_ghost_actions = self.__execute_ghost(query, agent_choice)
         elif agent_choice == "both":
             order = random.choice([True, False])
             if order:
+                ghost_order = "primary"
                 execution_result.primary_ghost_actions = self.__execute_ghost(query, "primary")
                 execution_result.secondary_ghost_actions = self.__execute_ghost(query, "secondary")
             else:
+                ghost_order = "secondary"
                 execution_result.primary_ghost_actions = self.__execute_ghost(query, "secondary")
                 execution_result.secondary_ghost_actions = self.__execute_ghost(query, "primary")
         
+        execution_result.ghost_order = ghost_order
         state.increment_activity()
+        logging.info(f"Activity level is now {state.activity_level}")
         execution_result.activity_level = state.activity_level
         return execution_result
+
+    def execute_command(self, command: str) -> SystemCallResult:
+        self.conversation.push(Message("user", f"(INTERNAL SYSTEM CALL) {command}"))
+        response = self.__execute_curator(
+            command,
+            "None, currently executing privileged system call"
+        )
+
+        for message in reversed(self.conversation.history):
+            if message.role == "user" and message.content.startswith("(INTERNAL SYSTEM CALL)"):
+                self.conversation.history.remove(message)
+                logging.info("System call cleanup ok")
+                break
+
+        actions = SystemCallResult()
+        actions.curator_actions = response
+        actions.curator_response = response.reasoning
+
+        self.events.push(SystemCallEvent(command, actions))
+        return actions

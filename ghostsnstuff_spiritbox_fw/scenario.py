@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 
 
 class RitualDefinition(BaseModel):
@@ -33,3 +33,7 @@ class ScenarioDefinition(BaseModel):
     secondary_ghost: GhostDefinition
     shared_lore: str
     final_goal: FinalGoalDefinition
+
+def load_scenario(file: str) -> ScenarioDefinition:
+    with open(file, "r") as f:
+        return TypeAdapter(ScenarioDefinition).validate_json(f.read())

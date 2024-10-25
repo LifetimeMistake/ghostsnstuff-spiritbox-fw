@@ -1,4 +1,5 @@
 import random
+from . import logging
 
 def clamp(n, minimum, maximum):
     return max(minimum, min(n, maximum))
@@ -59,7 +60,7 @@ def sanitize_ghost_speech(content: list[str] | str, word_limit: int = 5) -> list
     def sanitize_word(word: str) -> str:
         # If the word is actually a sentence, return the longest word from that sentence
         if " " in word:
-            print(f"WARN: Fixing bad word '{word}'")
+            logging.warn(f"Fixing bad word '{word}'")
             subwords = word.split(" ")
             return max(subwords, key=len).upper()  # Return the longest subword in uppercase
         return word.upper()
@@ -67,7 +68,7 @@ def sanitize_ghost_speech(content: list[str] | str, word_limit: int = 5) -> list
     if isinstance(content, str):
         words = content.split(" ")
         if len(words) > word_limit:
-            print(f"WARN: Trimming sentence: {len(words)}->{word_limit} words")
+            logging.warn(f"Trimming sentence: {len(words)}->{word_limit} words")
         return " ".join([sanitize_word(w) for w in words[:word_limit]])
 
     else:
@@ -75,5 +76,5 @@ def sanitize_ghost_speech(content: list[str] | str, word_limit: int = 5) -> list
         for word in content:
             sanitized_words.append(sanitize_word(word))
         if len(sanitized_words) > word_limit:
-            print(f"WARN: Trimming word list: {len(sanitized_words)}->{word_limit} words")
+            logging.warn(f"Trimming word list: {len(sanitized_words)}->{word_limit} words")
         return sanitized_words[:word_limit]
