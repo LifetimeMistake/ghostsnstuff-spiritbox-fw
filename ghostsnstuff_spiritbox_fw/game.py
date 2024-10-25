@@ -32,10 +32,12 @@ class CuratorActions:
     new_timer_value: Optional[float] = None
     game_result: Optional[GameResult] = None
     corrected_user_prompt: Optional[str] = None
+    reasoning: str
 
 class GhostActions:
     glitch: bool = False
     speech: List[str] | str | None = None
+    reasoning: str
     
 class RuntimeExecutionResult:
     curator_actions: CuratorActions
@@ -44,6 +46,10 @@ class RuntimeExecutionResult:
     ghost_order: str
     activity_level: float
     game_result: Optional[GameResult]
+
+class SystemCallResult:
+    curator_actions: CuratorActions
+    curator_response: str
 
 class GhostCallEvent(Event):
     def __init__(self, actor: EventActor, ghost_call: GhostActions):
@@ -71,6 +77,25 @@ class CuratorCallEvent(Event):
             "new_activity_level": self.data.new_activity_level,
             "new_timer_value": self.data.new_timer_value,
             "game_result": self.data.game_result
+        }
+
+class SystemCallEvent(Event):
+    def __init__(self, query: str, system_actions: SystemCallResult):
+        super().__init__("System", "system_call")
+        self.query = query
+        self.data = system_actions.curator_actions
+        self.response = system_actions.curator_response
+
+    def to_dict(self):
+        return {
+            **super().to_dict(),
+            "new_primary_note": self.data.new_primary_note,
+            "new_secondary_note": self.data.new_secondary_note,
+            "new_activity_level": self.data.new_activity_level,
+            "new_timer_value": self.data.new_timer_value,
+            "game_result": self.data.game_result,
+            "system_query": self.query,
+            "system_response": self.response
         }
 
 class GameRuntime:
@@ -132,6 +157,7 @@ class GameRuntime:
         )
 
         actions = CuratorActions()
+        actions.reasoning = response.action_reasoning
 
         primary_note = response.primary_ghost_note
         secondary_note = response.secondary_ghost_note
@@ -201,6 +227,7 @@ class GameRuntime:
         )
 
         actions = GhostActions()
+        actions.reasoning = response.reasoning
 
         # Process 
         if response.glitch:
@@ -276,3 +303,23 @@ class GameRuntime:
         logging.info(f"Activity level is now {state.activity_level}")
         execution_result.activity_level = state.activity_level
         return execution_result
+
+    def execute_command(self, command: str) -> SystemCallResult:
+        self.conversation.push(Message("user", f"(INTERNAL SYSTEM CALL) {command}"))
+        response = self.__execute_curator(
+            command,
+            "None, currently executing privileged system call"
+        )
+
+        for message in reversed(self.conversation.history):
+            if message.role == "user" and message.content.startswith("(INTERNAL SYSTEM CALL)"):
+                self.conversation.history.remove(message)
+                logging.info("System call cleanup ok")
+                break
+
+        actions = SystemCallResult()
+        actions.curator_actions = response
+        actions.curator_response = response.reasoning
+
+        self.events.push(SystemCallEvent(command, actions))
+        return actions
