@@ -15,6 +15,7 @@ if __name__ == "__main__":
     # display.glitch(False)
     # display.printText("HelloWorld")
     display.sweep(True)
+    display.printText("XXXXXX")
     spk.begin()
     spk.setInterference(1)
     time.sleep(1000000)

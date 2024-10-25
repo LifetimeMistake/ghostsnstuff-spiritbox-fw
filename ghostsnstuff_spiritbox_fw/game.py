@@ -41,11 +41,11 @@ class GhostActions:
     
 class RuntimeExecutionResult:
     curator_actions: CuratorActions
-    primary_ghost_actions: Optional[GhostActions]
-    secondary_ghost_actions: Optional[GhostActions]
+    primary_ghost_actions: Optional[GhostActions] = None
+    secondary_ghost_actions: Optional[GhostActions] = None
     ghost_order: str
     activity_level: float
-    game_result: Optional[GameResult]
+    game_result: Optional[GameResult] = None
 
 class SystemCallResult:
     curator_actions: CuratorActions

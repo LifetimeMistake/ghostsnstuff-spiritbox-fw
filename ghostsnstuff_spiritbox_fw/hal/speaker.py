@@ -1,7 +1,7 @@
 from abc import ABC
 import numpy as np
 import pyaudio
-import __audio_define as audef
+from . import audio_define as audef
 import threading
 from scipy.io import wavfile
 import time
@@ -84,5 +84,5 @@ class piSpeaker(speaker):
         
 
 
-# def getSpeaker():
-#     return piSpeaker()
+def getSpeaker():
+    return piSpeaker()

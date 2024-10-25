@@ -4,7 +4,7 @@ import webrtcvad
 import collections
 import threading
 import time
-import __audio_define as audef
+from . import audio_define as audef
 from abc import ABC
 # Constants
 
@@ -52,7 +52,7 @@ def _vad():
             is_speech = vad.is_speech(frame.tobytes(), audef.mic_sample_rate)
 
         if is_speech:
-            print("is speech")
+            #print("is speech")
             if (_iconCallback is not None):
                 _iconCallback(True)
             num_voiced_frames += 1
@@ -64,7 +64,7 @@ def _vad():
                     #_result_buffer = np.array(circular_buffer, dtype=np.int16)
                     _result_buffer = np.append(np.array(circular_buffer, dtype=np.int16), _result_buffer)
         else:
-            print("is not speech")
+            #print("is not speech")
             if (_iconCallback is not None):
                 _iconCallback(False)
             if _recording_event.is_set():
@@ -116,3 +116,6 @@ class piMic(microphone):
     def unregisterIconCallback(self):
         global _iconCallback
         _iconCallback = None
+
+def getMic():
+    return piMic()

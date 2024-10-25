@@ -28,7 +28,7 @@ class Logger:
         self.timeline.push(ConsoleLog("System", level, msg))
 
     def print(self, msg: str):
-        logging.print(msg)
+        logging.info(msg)
         self.__push("INFO", msg)
 
     def warn(self, msg: str):
