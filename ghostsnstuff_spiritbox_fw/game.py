@@ -6,6 +6,7 @@ from .models.curator import CuratorNotes, GameResult
 from .models.ghost import GhostResponse
 from .models.state import GameState
 from .agents import Curator, Ghost
+from . import logging
 from .conversation import Conversation, Message, MessageRole, GhostRole
 from .utils import sanitize_ghost_speech, weighted_ghost_choice
 
@@ -86,7 +87,7 @@ class GameRuntime:
         elif ghost == "secondary":
             notes.secondary_ghost_note = note
         else:
-            print(f"WARN: Attempted to set curator note for invalid ghost entity type: {ghost}")
+            logging.warn(f"Attempted to set curator note for invalid ghost entity type: {ghost}")
 
     def __execute_curator(self, query: str, agent_choice: GhostRole) -> CuratorActions:
         state = self.game_state
@@ -118,17 +119,17 @@ class GameRuntime:
             delta_activity = state.activity_level - response.activity_level
             activity_shift_str = f"{state.activity_level}->{response.activity_level}"
             if abs(delta_activity) > 1:
-                print(f"WARN: Curator attempted to set invalid activity level: {activity_shift_str}")
+                logging.warn(f"Curator attempted to set invalid activity level: {activity_shift_str}")
             else:
                 state.activity_level = response.activity_level
                 actions.new_activity_level = response.activity_level
-                print(f"Curator set activity level to {response.activity_level}")
+                logging.print(f"Curator set activity level to {response.activity_level}")
                 self.__push_message("curator", f"(updated activity level: {activity_shift_str})")
 
         # Update game timer
         if response.timer_value is not None:
             if state.get_remaining_time() == -1:
-                print("WARN: Curator attempted to set timer when scenario didn't include one")
+                logging.warn("Curator attempted to set timer when scenario didn't include one")
             else:
                 state.timer += response.timer_value
                 timer_shift_str = (
@@ -137,12 +138,12 @@ class GameRuntime:
                 )
                 actions.new_timer_value = state.get_remaining_time()
 
-                print(f"Curator {timer_shift_str}")
+                logging.print(f"Curator {timer_shift_str}")
                 self.__push_message("curator", f"({timer_shift_str})")
                 
         # Update user query
         if response.user_prompt_correction is not None:
-            print(f"Curator corrected user query to {response.user_prompt_correction}")
+            logging.print(f"Curator corrected user query to {response.user_prompt_correction}")
             actions.corrected_user_prompt = response.user_prompt_correction
 
         return actions
@@ -155,7 +156,7 @@ class GameRuntime:
             model = self.secondary_ghost
             note = self.curator_notes.secondary_ghost_note
         else:
-            print("WARN: Invalid ghost model queued for execution")
+            logging.warn("Invalid ghost model queued for execution")
             return None
         
         config = self.config
@@ -172,7 +173,7 @@ class GameRuntime:
         # Process 
         if response.glitch:
             if state.activity_level < config.glitch_min_level:
-                print("WARN: Ghost attempted to glitch EMF, but it wasn't allowed to")
+                logging.warn("Ghost attempted to glitch EMF, but it wasn't allowed to")
             else:
                 self.__glitch()
                 actions.glitch = True
@@ -208,7 +209,7 @@ class GameRuntime:
                 if message.role != "user":
                     break
                 if message.content != query:
-                    print(f"WARN: Failed to apply curator correction because the queries were mismatched: expected '{query}' found '{message.content}'")
+                    logging.warn(f"Failed to apply curator correction because the queries were mismatched: expected '{query}' found '{message.content}'")
                     break
                 message.content = curator_run.corrected_user_prompt
                 query = curator_run.corrected_user_prompt
