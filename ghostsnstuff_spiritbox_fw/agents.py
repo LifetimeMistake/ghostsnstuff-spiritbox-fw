@@ -75,7 +75,7 @@ class Writer:
         prompt = self.query_tpl.render(
             scenario_type=scenario_type,
             scenario_prompt=prompt,
-            scenario_example=scenario_example or "N/A"
+            scenario_example=scenario_example.model_dump_json(indent=2) or "N/A"
         )
 
         return self.agent.ask(prompt)

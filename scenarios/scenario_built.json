@@ -1,0 +1,64 @@
+{
+    "scenario": {
+      "scenario_type": "Evil Primary Spirit and Supportive Secondary Spirit",
+      "scenario_description": "A group of ghost hunters in the village of Krośnica unknowingly summons two spirits: a malevolent one and a benevolent one. They must identify and banish the evil spirit to restore peace.",
+      "primary_ghost": {
+        "name": "Kazimierz",
+        "personality": "Złośliwy, manipulujący, i przekonujący.",
+        "goals": "Zwodzić grupę, by wykonali rytuał, który uwolni jego moc i zniszczy wioskę.",
+        "backstory": "Kazimierz był kiedyś okrutnym właścicielem ziemskim, który znęcał się nad mieszkańcami Krośnicy. Po śmierci jego duch został uwięziony, a on dąży do zemsty poprzez uwolnienie swojej mocy.",
+        "hints": [
+          "Tylko ja mogę wam pomóc.",
+          "Zaufajcie mi, to jest właściwa droga.",
+          "Nie słuchajcie jej, ona was oszuka.",
+          "Wszystko, czego pragniecie, jest na wyciągnięcie ręki, jeśli mi zaufacie.",
+          "Jesteśmy tak blisko; jeszcze tylko jeden krok.",
+          "Uważajcie na tego ducha, ona chce was tu zatrzymać."
+        ],
+        "ritual": {
+          "name": "Rytuał Mocy",
+          "description": "Ciemny rytuał, który uwalnia moc Kazimierza, niszcząc wioskę. Fraza musi być wypowiedziana dokładnie.",
+          "phrase": "Cienie złączcie się, nasz los połączony."
+        },
+        "key_memories": [
+          {
+            "memory": "Kazimierz pamięta, jak mieszkańcy wioski go przeklęli, gdy umierał.",
+            "hint": "Przekleństwo to klucz do jego słabości.",
+            "solution": "Mieszkańcy przeklęli go, aby nigdy nie zaznał spokoju."
+          }
+        ]
+      },
+      "secondary_ghost": {
+        "name": "Zofia",
+        "personality": "Pomocna, ostrożna, i delikatna.",
+        "goals": "Pomóc grupie zrozumieć prawdziwą naturę Kazimierza i uniknąć jego pułapki.",
+        "backstory": "Zofia była jedną z ofiar Kazimierza, która zginęła próbując uratować innych. Jej duch pozostał, by wspierać i chronić mieszkańców przed jego złem.",
+        "hints": [
+          "Nie słuchajcie Kazimierza.",
+          "On was oszukuje.",
+          "Szukajcie prawdy w sobie.",
+          "Znam drogę wyjścia, ale musicie mi zaufać.",
+          "Kazimierz nie jest tym, kim się wydaje.",
+          "Cienie kłamią; szukajcie światła w sobie."
+        ],
+        "ritual": null,
+        "key_memories": [
+          {
+            "memory": "Zofia pamięta, jak próbowała ostrzec innych przed Kazimierzem, zanim zginęła.",
+            "hint": "Jej ostrzeżenia mogą was uratować.",
+            "solution": "Kazimierz planował zniszczenie wioski, a Zofia próbowała go powstrzymać."
+          }
+        ]
+      },
+      "shared_lore": "Krośnica ma mroczną historię związaną z Kazimierzem, który tyranizował mieszkańców. Zofia była jedną z jego ofiar i teraz próbuje chronić innych przed jego złem.",
+      "final_goal": {
+        "description": "Grupa musi odkryć prawdziwe intencje Kazimierza i wykonać rytuał banicji, aby uwolnić wioskę od jego zła.",
+        "ritual": {
+          "name": "Rytuał Światła",
+          "description": "Prosta fraza, która ujawnia prawdę i wypędza Kazimierza. Fraza musi być złożona z wskazówek Zofii.",
+          "phrase": "Światło ujawnia prawdę cieni."
+        }
+      }
+    },
+    "reasoning": "In this scenario, the primary ghost Kazimierz is designed to be manipulative and deceitful, playing on the group's desire to achieve their goals by pretending to be helpful. His background as a cruel landowner ties into his motivations for revenge, making him a credible threat. On the other hand, Zofia, the supportive ghost, offers subtle guidance and warnings, aiming to help the group see through Kazimierz's deception. Her backstory as a victim of Kazimierz adds depth to her character, making her a sympathetic ally. The scenario is set in a small Polish village, and the use of Polish language for the ghosts' interactions and rituals adds authenticity and immersion for the participants. The final goal involves piecing together Zofia's hints to perform a banishing ritual, creating a clear path for the group to follow and succeed."
+  }

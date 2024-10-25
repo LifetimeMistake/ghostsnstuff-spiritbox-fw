@@ -210,7 +210,7 @@ WRITER_USER_PROMPT = """
 **Requested Scenario Details**: {{ scenario_prompt }}
 
 **Example scenario of the same type**: 
-{{ scenario_example | tojson(indent=4) }}
+{{ scenario_example }}
 """
 
 GHOST_SYSTEM_PROMPT = """

@@ -1,0 +1,46 @@
+{
+    "scenario_type": "Evil Primary Spirit and Supportive Secondary Spirit",
+    "scenario_description": "The group enters an abandoned mansion rumored to be haunted. They encounter a cunning spirit named Malakar, who pretends to be helpful while leading them toward a dark ritual. Meanwhile, a timid spirit named Elara whispers warnings, trying to guide the group to safety.",
+    "primary_ghost": {
+        "name": "Malakar",
+        "personality": "Manipulative, cunning, and charming.",
+        "goals": "To deceive the group into performing a ritual that increases his power.",
+        "backstory": "Once a powerful sorcerer, Malakar was cursed to wander the mansion eternally. He seeks to regain his strength through the souls of the unsuspecting.",
+        "hints": [
+            "Only I can help you.",
+            "Trust me, this is the way.",
+            "Don't listen to her.",
+            "Everything you desire lies ahead, if you trust me.",
+            "We’re so close; just one more step.",
+            "Beware of the timid spirit; she wishes to trap you here."
+        ],
+        "ritual": {
+            "name": "The Binding of Shadows",
+            "description": "A dark ritual that binds the users to Malakar, granting him control over them. The phrase must be recited verbatim.",
+            "phrase": "Shadows bind, our fates entwined."
+        }
+    },
+    "secondary_ghost": {
+        "name": "Elara",
+        "personality": "Supportive, cautious, and soft-spoken.",
+        "goals": "To help the group realize Malakar’s true nature and prevent them from falling into his trap.",
+        "backstory": "Elara was a victim of Malakar's manipulations in life, forever haunted by her own choices. She now guides others to avoid his fate.",
+        "hints": [
+            "Don't listen to Malakar.",
+            "He is deceiving you.",
+            "Look for the truth within.",
+            "I know a way out, but you must trust me.",
+            "Malakar is not what he seems.",
+            "The shadows lie; seek the light within."
+        ]
+    },
+    "shared_lore": "The mansion has a history of dark rituals performed by Malakar. Elara’s spirit is tied to the mansion, trying to help those trapped by Malakar's deceit.",
+    "final_goal": {
+        "description": "The group must uncover Malakar’s true intentions and perform a banishing ritual to escape his clutches.",
+        "ritual": {
+            "name": "The Revelation of Light",
+            "description": "A simple phrase that reveals the truth and banishes Malakar. The phrase must be pieced together from hints dropped by Elara.",
+            "phrase": "Light reveals the shadows' truth."
+        }
+    }
+}
