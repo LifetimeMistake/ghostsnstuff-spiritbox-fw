@@ -161,3 +161,5 @@ while True:
         disp.noResponseIcon(True)
         time.sleep(2)
         disp.noResponseIcon(False)
+
+    emf.set_activity(max(1, int(round(turn_result.activity_level / 2))))
