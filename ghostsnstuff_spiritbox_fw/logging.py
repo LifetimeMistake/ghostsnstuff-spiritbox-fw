@@ -22,6 +22,9 @@ class Logger:
         self.timeline = timeline
 
     def __push(self, level: LogLevel, msg: str):
+        if not self.timeline:
+            return
+        
         self.timeline.push(ConsoleLog("System", level, msg))
 
     def print(self, msg: str):
@@ -35,3 +38,17 @@ class Logger:
     def error(self, msg: str):
         logging.error(msg)
         self.__push("ERROR", msg)
+
+_logger = Logger(None)
+
+def set_timeline(timeline: EventTimeline):
+    _logger.timeline = timeline
+
+def print(msg: str):
+    _logger.print(msg)
+
+def warn(msg: str):
+    _logger.warn(msg)
+
+def error(msg: str):
+    _logger.error(msg)
