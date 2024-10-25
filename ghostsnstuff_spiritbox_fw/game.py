@@ -300,7 +300,7 @@ class GameRuntime:
         
         execution_result.ghost_order = ghost_order
         state.increment_activity()
-        logging.info(f"Activity level is now {state.activity_level}")
+        logging.print(f"Activity level is now {state.activity_level}")
         execution_result.activity_level = state.activity_level
         return execution_result
 
@@ -314,7 +314,7 @@ class GameRuntime:
         for message in reversed(self.conversation.history):
             if message.role == "user" and message.content.startswith("(INTERNAL SYSTEM CALL)"):
                 self.conversation.history.remove(message)
-                logging.info("System call cleanup ok")
+                logging.print("System call cleanup ok")
                 break
 
         actions = SystemCallResult()
