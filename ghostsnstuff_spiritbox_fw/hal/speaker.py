@@ -20,12 +20,12 @@ beep3 = None
 beep1 = None
 def _load_static_files():
     global static1, beep1, static3, static2, beep2, beep3
-    rate, static1 = wavfile.read("./ghostsnstuff_spiritbox_fw/hal/audio/interference_level1_2.wav")
-    rate, static2 = wavfile.read("./ghostsnstuff_spiritbox_fw/hal/audio/interference_level2.wav")
-    rate, static3 = wavfile.read("./ghostsnstuff_spiritbox_fw/hal/audio/interference_level3_2.wav")
-    rate, beep1 = wavfile.read("./ghostsnstuff_spiritbox_fw/hal/audio/beep1.wav")
-    rate, beep2 = wavfile.read("./ghostsnstuff_spiritbox_fw/hal/audio/beep2.wav")
-    rate, beep3 = wavfile.read("./ghostsnstuff_spiritbox_fw/hal/audio/beep3.wav")
+    rate, static1 = wavfile.read("./assets/sounds/interference_level1_2.wav")
+    rate, static2 = wavfile.read("./assets/sounds/interference_level2.wav")
+    rate, static3 = wavfile.read("./assets/sounds/interference_level3_2.wav")
+    rate, beep1 = wavfile.read("./assets/sounds/beep1.wav")
+    rate, beep2 = wavfile.read("./assets/sounds/beep2.wav")
+    rate, beep3 = wavfile.read("./assets/sounds/beep3.wav")
 interference_value = 1
 def __play_numpy_buffer_thread(buffer, sample_rate, channels, chunk_size):
     # if buffer.ndim > 1:

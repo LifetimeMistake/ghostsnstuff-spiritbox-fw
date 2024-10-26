@@ -20,15 +20,15 @@ if platform.isRaspberryPi():
         disp.display(buffer)
 
 img = Image.new('RGB', (160, 80), color=(248, 133, 18))
-font = ImageFont.truetype("./ghostsnstuff_spiritbox_fw/hal/DSEG14Modern-Italic.ttf", 30)
-micIcon = Image.open("./ghostsnstuff_spiritbox_fw/hal/icons/mic.png")
-micDisabledIcon = Image.open("./ghostsnstuff_spiritbox_fw/hal/icons/mic_disabled.png")
-responseIcon = Image.open("./ghostsnstuff_spiritbox_fw/hal/icons/response.png")
-responseDisabledIcon = Image.open("./ghostsnstuff_spiritbox_fw/hal/icons/response_disabled.png")
-noResponseIcon = Image.open("./ghostsnstuff_spiritbox_fw/hal/icons/no_response.png")
-noResponseDisabledIcon = Image.open("./ghostsnstuff_spiritbox_fw/hal/icons/no_response_disabled.png")
-thinkingIcon = Image.open("./ghostsnstuff_spiritbox_fw/hal/icons/thinking.png")
-thinkingDisabledIcon = Image.open("./ghostsnstuff_spiritbox_fw/hal/icons/thinking_disabled.png")
+font = ImageFont.truetype("./assets/fonts/DSEG14Modern-Italic.ttf", 30)
+micIcon = Image.open("./assets/icons/mic.png")
+micDisabledIcon = Image.open("./assets/icons/mic_disabled.png")
+responseIcon = Image.open("./assets/icons/response.png")
+responseDisabledIcon = Image.open("./assets/icons/response_disabled.png")
+noResponseIcon = Image.open("./assets/icons/no_response.png")
+noResponseDisabledIcon = Image.open("./assets/icons/no_response_disabled.png")
+thinkingIcon = Image.open("./assets/icons/thinking.png")
+thinkingDisabledIcon = Image.open("./assets/icons/thinking_disabled.png")
 _micActive = False
 _responseActive = False
 _noResponseActive = False
