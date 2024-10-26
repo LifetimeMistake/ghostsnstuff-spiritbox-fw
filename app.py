@@ -76,7 +76,6 @@ def get_buffer_length(buffer, sample_rate, num_channels):
     return num_samples / (sample_rate*num_channels)
 
 def handle_ghost_actions(actions, voice):
-    emf.glitch()
     if actions.glitch:
         disp.glitch(True)
         spk.setInterference(2)
@@ -85,7 +84,6 @@ def handle_ghost_actions(actions, voice):
         disp.glitch(False)
         pass
     if not actions.speech:
-
         return
     if isinstance(actions.speech, list):
         buffers = tts.synthesize_batch(actions.speech, voice, 0.75)
