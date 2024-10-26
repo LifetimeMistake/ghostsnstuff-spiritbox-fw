@@ -1,30 +1,16 @@
 from abc import ABC
-import platform
+from . import platform
 import threading
 import time
 import random
 
 _win_display = False
 
-system = platform.system()
-def isOnPi():
-
-    if "Linux" in system and "arm" in platform.machine():
-        return True
-    else:
-        return False
-    
-def isOnWin():
-    if "Windows" in system:
-        return True
-    else:
-        return False
-if isOnWin():
-
+if platform.isWindows():
     from PIL import Image, ImageDraw, ImageFont, ImageTk
     import tkinter as tk
 
-if (isOnPi()):
+if platform.isRaspberryPi():
     import st7735
     from PIL import Image, ImageDraw, ImageFont
     global disp
@@ -63,7 +49,7 @@ def _tkDisplay():
     tklabel.pack()
     root.mainloop()
 
-if (isOnWin()):
+if (platform.isWindows()):
 
     tkThread = threading.Thread(target=_tkDisplay)  
     def _pushBuffer(buffer):
@@ -84,8 +70,8 @@ def _glitchThread():
         _noResponseActive = bool(random.getrandbits(1))
         global _responseActive
         _responseActive = bool(random.getrandbits(1))
-        if isOnPi():
-            if (bool(random.getrandbits(1))==True):
+        if platform.isRaspberryPi():
+            if random.getrandbits(1):
                 disp.set_backlight(255)
             else:
                 disp.set_backlight(255)
@@ -309,9 +295,9 @@ class consoleDisplay(display):
         print(f"display_brightness: {brightness}")
 
 def getDisplay():
-    if (isOnPi()):
+    if (platform.isRaspberryPi()):
         return piDisplay()
-    elif (isOnWin()):
+    elif (platform.isWindows()):
         global _win_display
         _win_display= True
         return piDisplay()
