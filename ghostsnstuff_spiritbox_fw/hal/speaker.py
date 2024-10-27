@@ -81,5 +81,5 @@ class AudioDriver:
         
         return buffer
     
-def get_audio():
+def get_audio() -> AudioDriver:
     return AudioDriver()

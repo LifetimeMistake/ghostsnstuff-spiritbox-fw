@@ -305,7 +305,7 @@ class ConsoleDisplay(Display):
         super().set_text(content, duration)     
         logging.print(f"Display: Set text: {content}, duration: {duration}")
 
-def get_display():
+def get_display() -> Display:
     if platform.isWindows():
         if TK_AVAILABLE:
             return WindowsDisplay()

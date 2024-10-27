@@ -125,5 +125,5 @@ class PaMicrophone(Microphone):
         return MIC_SAMPLE_RATE
 
 
-def get_microphone():
+def get_microphone() -> Microphone:
     return PaMicrophone()
