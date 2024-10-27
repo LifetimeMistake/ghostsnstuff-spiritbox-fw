@@ -121,6 +121,9 @@ class PaMicrophone(Microphone):
     def unregister_icon_callback(self):
         self._icon_callback = None
 
+    def get_sample_rate(self) -> int:
+        return MIC_SAMPLE_RATE
+
 
 def get_microphone():
     return PaMicrophone()

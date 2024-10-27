@@ -1,118 +1,85 @@
-from abc import ABC
+import pygame
 import numpy as np
-import pyaudio
-from . import audio_define as audef
-#import ghostsnstuff_spiritbox_fw.hal.audio_define as audef
 import threading
-from scipy.io import wavfile
 import time
-import random
-pa = pyaudio.PyAudio()
+from scipy.signal import resample
 
-__stop_interference = 1
+class AudioDriver:
+    def __init__(self, sample_rate: int = 44100, playback_channels: int = 4, enable_stereo: bool = True):
+        self.sample_rate = sample_rate
+        self.playback_channels = playback_channels
+        self.enable_stereo = enable_stereo
 
-static1 = None
-static2 = None
-static3 = None
-beep1 = None
-beep2 = None
-beep3 = None
-beep1 = None
-def _load_static_files():
-    global static1, beep1, static3, static2, beep2, beep3
-    rate, static1 = wavfile.read("./assets/sounds/interference_level1_2.wav")
-    rate, static2 = wavfile.read("./assets/sounds/interference_level2.wav")
-    rate, static3 = wavfile.read("./assets/sounds/interference_level3_2.wav")
-    rate, beep1 = wavfile.read("./assets/sounds/beep1.wav")
-    rate, beep2 = wavfile.read("./assets/sounds/beep2.wav")
-    rate, beep3 = wavfile.read("./assets/sounds/beep3.wav")
-interference_value = 1
-def __play_numpy_buffer_thread(buffer, sample_rate, channels, chunk_size):
-    # if buffer.ndim > 1:
-    #     buffer = buffer.mean(axis=1)
-    stream = pa.open(format=audef.speaker_pa_format, channels=channels, rate=sample_rate, output=True, frames_per_buffer=audef.speaker_chunk_size)
-    buffer = buffer.astype(audef.speaker_np_format)
-    max_val = np.max(np.abs(buffer))
-    if max_val >0:
-        buffer /= max_val
+        pygame.mixer.init(frequency=sample_rate, channels=2 if enable_stereo else 1)
+        pygame.mixer.set_num_channels(playback_channels)
+        pygame.mixer.set_reserved(1) # reserved for interference
+        self.interference_sounds = [
+            self.load_sound(f"./assets/sounds/interference_level{i}.wav") for i in range(1, 3)
+        ]
+        self.beeps = [
+            self.load_sound(f"./assets/sounds/beep{i}.wav") for i in range(1, 4)
+        ]
+        self.interference_channel = pygame.mixer.Channel(0)
 
-    index = 0
-    buffer_size = len(buffer)
-    while index < buffer_size:
-        chunk = buffer[index:index + 1024]
-        if len(chunk) < 1024:
-            chunk = np.pad(chunk, (0,1024 - len(chunk)), 'constant')
-        stream.write(chunk.tobytes())
-        index += 1024
+    def load_sound(self, path):
+        """ Load a sound file and return the Sound object. """
+        return pygame.mixer.Sound(path)
 
-    stream.stop_stream()
-    stream.close()
+    def set_interference_level(self, level):
+        """ Set the level of interference sound (0-2). """
+        if level < 0 or level > 2:
+            raise IndexError("Invalid interference level")
+        
+        if self.interference_channel.get_busy():
+            self.interference_channel.stop()
 
-
-
-def _setInterference(value):
-    if (value == 0):
-        global __stop_interference
-        __stop_interference = 1
-
-def play_numpy_buffer(buffer, sample_rate, channels, chunk_size):
-    playbackThread = threading.Thread(target=__play_numpy_buffer_thread, args=(buffer, sample_rate, channels, chunk_size))
-    playbackThread.start()
-
-interference_kill_event = threading.Event()
-def _simulate_interferance_thread():
-    _millis1 = time.time()
-    _millis2 = time.time()
-    while True:
-        bobma = random.randint(17, 30)/10
-        #print (bobma)
-        if time.time() - _millis1 >= bobma:
-            play_numpy_buffer(static1, 48000, 1, 1024)
-            _millis1 = time.time()
-        if time.time() - _millis2 >= random.randint(30, 300):
-            play_numpy_buffer(beep1, 48000, 1, 1024)
-            _millis2 = time.time()
-        if interference_kill_event.is_set():
+        if level == 0:
             return
+
+        interference = self.interference_sounds[level-1]
+        self.interference_channel.play(interference, -1)
+
+    def get_interference_volume(self) -> float:
+        return self.interference_channel.get_volume()
+
+    def set_interference_volume(self, volume: float):
+        self.interference_channel.set_volume(volume)
+
+    def play_beep(self, sound_index: int):
+        """ Play a beep sound. """
+        if sound_index < 0 or sound_index > 3:
+            raise IndexError("Invalid beep index")
+        
+        sound = self.beeps[sound_index - 1]
+        sound.play()
+        return sound.get_length()
+
+    def play_buffer(self, buffer, buffer_sample_rate):
+        """ Play a numpy buffer as sound. """
+        buffer = self.normalize_buffer(buffer, buffer_sample_rate)
+        sound = pygame.mixer.Sound(buffer)
+        sound.play()
+        return sound.get_length()  # Return duration of the sound
+
+    def normalize_buffer(self, buffer: np.ndarray, sample_rate: int):
+        """ Normalize and adjust the numpy buffer to match Pygame's format. """
+        # Resample if needed
+        if sample_rate != self.sample_rate:
+            num_samples = round(len(buffer) * self.sample_rate / sample_rate)
+            buffer = resample(buffer, num_samples)
+        
+        # Normalize to int16 range
+        max_val = np.max(np.abs(buffer))
+        if max_val > 0:
+            buffer = (buffer / max_val * 32767).astype(np.int16)  # Convert to int16
+
+        # Convert to stereo if enabled
+        if buffer.ndim == 1 and self.enable_stereo:
+            buffer = np.column_stack((buffer, buffer))
+        elif buffer.ndim > 2:
+            raise ValueError("Audio buffer must be either mono or stereo")
+        
+        return buffer
     
-        
-
-
-class speaker(ABC):
-    def playBuffer(self, buffer, sample_rate):
-        pass
-    def begin(self):
-        pass
-    def setInterference(self):
-        pass
-
-class piSpeaker(speaker):
-    def playBuffer(self, buffer, sample_rate):
-        play_numpy_buffer(buffer, sample_rate, audef.speaker_channels, audef.speaker_chunk_size)
-    def begin(self):
-        _load_static_files()
-    def setInterference(self, value):
-        if value == 0:
-            interference_kill_event.set()
-            time.sleep(0.1)
-            interference_kill_event.clear()
-            return
-        if value == 1:
-            interference_kill_event.set()
-            time.sleep(0.1)
-            interference_kill_event.clear()
-        if value == 2:
-            play_numpy_buffer(static2, 48000, 1, 1024)
-            return
-        if value == 3:
-            play_numpy_buffer(static3, 48000, 1, 1024)
-            return
-        interference_thread = threading.Thread(target=_simulate_interferance_thread)
-        #_setInterference(value)
-        interference_thread.start()
-        #asd
-        
-
-
-def getSpeaker():
-    return piSpeaker()
+def get_audio():
+    return AudioDriver()
