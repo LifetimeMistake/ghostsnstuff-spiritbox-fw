@@ -17,9 +17,8 @@ numpy = "^2.1.2"
 scipy = "^1.14.1"
 soundfile = "^0.12.1"
 pillow = "^11.0.0"
-st7735 = "^1.0.0"
+st7735 = { version = "^1.0.0", markers = "sys_platform != 'win32'" }
 pyaudio = "^0.2.14"
-
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
