@@ -159,11 +159,11 @@ class Display(ABC):
     def enable_sweep(self, enable: bool):
         self._sweep_enabled = enable
 
-    def set_icon_state(self, mic=False, response=False, no_response=False, thinking=False):
-        self._mic_active = mic
-        self._response_active = response
-        self._no_response_active = no_response
-        self._thinking_active = thinking
+    def set_icon_state(self, mic: bool | None = None, response: bool | None = None, no_response: bool | None = None, thinking: bool | None = None):
+        self._mic_active = mic if mic is not None else self._mic_active
+        self._response_active = response if response is not None else self._response_active
+        self._no_response_active = no_response if no_response is not None else self._no_response_active
+        self._thinking_active = thinking if thinking is not None else self._thinking_active
 
     def enable_glitch(self, enable: bool):
         self._glitch_enabled = enable
