@@ -3,6 +3,8 @@ import threading
 import time
 import random
 from PIL import Image, ImageDraw, ImageFont
+from .. import logging
+from . import platform
 from ..utils import clamp
 
 FONT_PATH = "./assets/fonts/DSEG14Modern-Italic.ttf"
@@ -271,3 +273,48 @@ class ST7735Display(Display):
     def _render(self):
         buffer = self._render()
         self.display.display(buffer)
+
+class ConsoleDisplay(Display):
+    def __init__(self):
+        super().__init__()
+
+    def begin(self):
+        pass
+
+    def enable_sweep(self, enable):
+        super().enable_sweep(enable)
+        logging.print(f"Display: Sweep enabled = {enable}")
+
+    def set_icon_state(self, mic = None, response = None, no_response = None, thinking = None):
+        super().set_icon_state(mic, response, no_response, thinking)
+        if mic is not None:
+            logging.print(f"Display: Microphone icon = {mic}")
+        if response is not None:
+            logging.print(f"Display: Response icon = {response}")
+        if no_response is not None:
+            logging.print(f"Display: No response icon = {no_response}")
+        if thinking is not None:
+            logging.print(f"Display: Thinking icon = {thinking}")
+
+    def enable_glitch(self, enable):
+        super().enable_glitch(enable)
+        logging.print(f"Display: Glitch enabled = {enable}")
+
+    def set_text(self, content, duration = None):
+        super().set_text(content, duration)     
+        logging.print(f"Display: Set text: {content}, duration: {duration}")
+
+def get_display():
+    if platform.isWindows():
+        if TK_AVAILABLE:
+            return WindowsDisplay()
+        else:
+            logging.warn("Detected Windows platform, but tkinter was not available")
+    
+    if platform.isRaspberryPi():
+        if ST7735_AVAILABLE:
+            return ST7735Display()
+        else:
+            logging.warn("Detected Raspberry Pi platform, but st7735 was not available")
+
+    return ConsoleDisplay()
