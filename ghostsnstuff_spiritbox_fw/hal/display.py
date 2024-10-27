@@ -33,41 +33,50 @@ try:
     ST7735_AVAILABLE = True
 except ImportError:
     ST7735_AVAILABLE = False
-
-def calculate_text_offset(text_length: int, display_width: int, current_tick: int, start_delay_seconds: float, display_duration: float | None, max_scroll_duration: float = 5):
+    
+def calculate_text_offset(
+    text_length: int, 
+    display_width: int, 
+    current_tick: int, 
+    start_delay_seconds: float, 
+    display_duration: float | None, 
+    max_scroll_duration: float = 5,
+):
     # Calculate parameters
     initial_delay_ticks = int(start_delay_seconds / DISPLAY_REFRESH_INTERVAL)  # delay before scrolling starts
     scroll_duration_ticks = int(max_scroll_duration / DISPLAY_REFRESH_INTERVAL)  # max scroll duration in ticks
-    # handle infinite text display duration
+
+    # Limit scroll duration if a shorter display duration is set
     if display_duration is not None:
-        scroll_duration_ticks = min(scroll_duration_ticks, int(display_duration / DISPLAY_REFRESH_INTERVAL))
-    text_length = text_length
+        scroll_duration_ticks = min(scroll_duration_ticks, int(display_duration / DISPLAY_REFRESH_INTERVAL) - 2 * initial_delay_ticks)
     
-    # Scroll only if text length is greater than display width
+    # Scroll only if text length exceeds display width
     if text_length <= display_width:
         return 0  # no scrolling needed
-
+    
     # Calculate total scrollable distance
     max_offset = text_length - display_width  # max characters to scroll
 
-    # Determine if we are in the initial delay period
-    if current_tick % scroll_duration_ticks < initial_delay_ticks:
-        return 0  # still waiting before scrolling starts
+    # Determine the effective tick count with delay applied for each interval
+    effective_t = current_tick % (scroll_duration_ticks + 2 * initial_delay_ticks)
+    
+    # Direction: 0 = forward, 1 = reverse, alternates each interval
+    interval_count = current_tick // (scroll_duration_ticks + 2 * initial_delay_ticks)
+    direction = interval_count % 2
 
-    # Calculate the effective tick count after initial delay
-    effective_t = current_tick - initial_delay_ticks
+    # Apply delays at the start and end of each interval
+    if effective_t < initial_delay_ticks:
+        return 0 if direction == 0 else max_offset  # Starting delay
+    elif effective_t >= initial_delay_ticks + scroll_duration_ticks:
+        return max_offset if direction == 0 else 0  # Ending delay
 
-    # Determine if we're scrolling forward or in reverse (based on 5s intervals)
-    direction = 1 if (effective_t // scroll_duration_ticks) % 2 == 0 else -1
-
-    # Calculate the progress within the current scroll interval
-    progress_in_interval = effective_t % scroll_duration_ticks
+    # Calculate scroll progress within the scrolling portion of the interval
+    progress_in_interval = effective_t - initial_delay_ticks
     step_fraction = progress_in_interval / scroll_duration_ticks
-    
-    # Calculate offset based on direction and step fraction
-    offset = int(max_offset * step_fraction * direction)
-    
-    return offset
+
+    # Offset based on direction and step fraction
+    offset = round(max_offset * step_fraction)
+    return offset if direction == 0 else max_offset - offset
 
 
 class DisplayRenderer:
@@ -95,7 +104,7 @@ class DisplayRenderer:
                 display_width=6,
                 current_tick=display._text_ticks,
                 start_delay_seconds=0.5,
-                display_duration=display._text_duration,
+                display_duration=display._text_duration * DISPLAY_REFRESH_INTERVAL,
                 max_scroll_duration=5.0
             )
             self._draw_text(draw, display._text, offset)
@@ -170,9 +179,9 @@ class Display(ABC):
 
     def set_text(self, content: str | None, duration: float | None = None):
         if content:
-            self._text = content
+            self._text = content.replace(" ", "    ")
             self._text_ticks = 0
-            self._text_duration = duration * max(1, round(1/DISPLAY_REFRESH_INTERVAL, 0)) if duration else None
+            self._text_duration = int(duration / DISPLAY_REFRESH_INTERVAL) if duration else None
         else:
             self._text = None
             self._text_ticks = None
@@ -208,12 +217,8 @@ class Display(ABC):
 class WindowsDisplay(Display):
     def __init__(self):
         super().__init__()
-        self.root = tk.Tk()
-        self.root.geometry("160x80")
-        self.root.title("GHOSTSNSTUFF-SPIRITBOX WINDISP")
-        self.tklabel = tk.Label(self.root)
-        self.tklabel.pack()
         self.renderer = DisplayRenderer()
+        self.root = None
         self._display_thread = threading.Thread(target=self._run_display, daemon=True)
 
     def begin(self):
@@ -221,9 +226,17 @@ class WindowsDisplay(Display):
         super().begin()
 
     def _run_display(self):
+        self.root = tk.Tk()
+        self.root.geometry("160x80")
+        self.root.title("GHOSTSNSTUFF-SPIRITBOX WINDISP")
+        self.tklabel = tk.Label(self.root)
+        self.tklabel.pack()
         self.root.mainloop()
 
     def _render(self):
+        if not self.root:
+            return
+        
         buffer = ImageTk.PhotoImage(self.renderer.render(self))
         self.tklabel.config(image=buffer)
         self.tklabel.image = buffer
