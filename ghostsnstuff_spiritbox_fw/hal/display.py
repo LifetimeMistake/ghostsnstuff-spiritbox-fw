@@ -100,10 +100,17 @@ class DisplayRenderer:
             )
             self._draw_text(draw, display._text, offset)
         elif display._sweep_enabled:
-            self._draw_sweep(draw, display)
+            self._draw_sweep(draw, display._sweep_value)
 
         # Draw icons
-        self._draw_icons(imgbuf, display)
+        if not display._glitch_enabled:
+            self._draw_icons(
+                imgbuf=imgbuf,
+                mic_active=display._mic_active,
+                thinking_active=display._thinking_active,
+                no_response_active=display._no_response_active,
+                response_active=display._response_active,
+            )
 
         return imgbuf
 
@@ -143,12 +150,11 @@ class Display(ABC):
         self._text = None
         self._text_ticks = None
         self._text_duration = None
-        self._renderer = DisplayRenderer()
         self._update_thread = threading.Thread(target=self._update_loop, daemon=True)
 
     @abstractmethod
     def begin(self):
-        pass
+        self._update_thread.start()
 
     def enable_sweep(self, enable: bool):
         self._sweep_enabled = enable
@@ -198,3 +204,26 @@ class Display(ABC):
                     self._text_duration = None
 
             time.sleep(DISPLAY_REFRESH_INTERVAL)
+
+class WindowsDisplay(Display):
+    def __init__(self):
+        super().__init__()
+        self.root = tk.Tk()
+        self.root.geometry("160x80")
+        self.root.title("GHOSTSNSTUFF-SPIRITBOX WINDISP")
+        self.tklabel = tk.Label(self.root)
+        self.tklabel.pack()
+        self.renderer = DisplayRenderer()
+        self._display_thread = threading.Thread(target=self._run_display, daemon=True)
+
+    def begin(self):
+        self._display_thread.start()
+        super().begin()
+
+    def _run_display(self):
+        self.root.mainloop()
+
+    def _render(self):
+        buffer = ImageTk.PhotoImage(self.renderer.render(self))
+        self.tklabel.config(image=buffer)
+        self.tklabel.image = buffer
