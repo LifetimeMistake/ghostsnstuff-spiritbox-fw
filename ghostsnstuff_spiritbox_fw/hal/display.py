@@ -31,6 +31,12 @@ except ImportError:
 try:
     import st7735
     ST7735_AVAILABLE = True
+    ST7735_PORT = 0
+    ST7735_CS = st7735.BG_SPI_CS_BACK
+    ST7735_DC = "GPIO9"
+    ST7735_BACKLIGHT = "GPIO12"
+    ST7735_ROTATION = 90
+    ST7735_SPI_SPEED_HZ = 4000000
 except ImportError:
     ST7735_AVAILABLE = False
     
@@ -245,3 +251,23 @@ class WindowsDisplay(Display):
         buffer = ImageTk.PhotoImage(self.renderer.render(self))
         self.tklabel.config(image=buffer)
         self.tklabel.image = buffer
+
+class ST7735Display(Display):
+    def __init__(self):
+        super().__init__()
+        self.renderer = DisplayRenderer()
+        self.display = st7735.ST7735(
+            port=ST7735_PORT,
+            cs=ST7735_CS,
+            dc=ST7735_DC,
+            backlight=ST7735_BACKLIGHT,
+            rotation=ST7735_ROTATION,
+            spi_speed_hz=ST7735_SPI_SPEED_HZ
+        )
+
+    def begin(self):
+        return super().begin()
+    
+    def _render(self):
+        buffer = self._render()
+        self.display.display(buffer)
