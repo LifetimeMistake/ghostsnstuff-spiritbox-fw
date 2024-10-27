@@ -97,7 +97,7 @@ class DisplayRenderer:
 
         # Draw sweep or text
         if display._glitch_enabled:
-            self._draw_glitch(imgbuf)
+            self._draw_glitch(imgbuf, draw)
         elif display._text:
             offset = calculate_text_offset(
                 text_length=len(display._text),
@@ -123,12 +123,17 @@ class DisplayRenderer:
 
         return imgbuf
 
-    def _draw_glitch(self, imgbuf: Image.Image):
-        # test code
-        pixels = imgbuf.load()
-        for i in range(160):
-            for j in range(80):
-                pixels[i, j] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    def _draw_glitch(self, imgbuf: Image.Image, draw: ImageDraw.ImageDraw):
+        self._draw_icons(
+            imgbuf=imgbuf,
+            mic_active=bool(random.getrandbits(1)),
+            no_response_active=bool(random.getrandbits(1)),
+            response_active=bool(random.getrandbits(1)),
+            thinking_active=bool(random.getrandbits(1))
+        )
+
+        text = "".join([random.choice(['~', '-', 'X', '?', '+', 'F', 'M', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) for _ in range(6)])
+        self._draw_text(draw, text, 0)
 
     def _draw_sweep(self, draw: ImageDraw.ImageDraw, frequency: float):
         freq_text = f"{frequency:.1f} FM" if frequency >= 100 else f"    {frequency:.1f} FM"
