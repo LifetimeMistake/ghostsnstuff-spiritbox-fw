@@ -1,6 +1,8 @@
 import gatt
 import threading
 from typing import Self
+from . import platform
+from abc import ABC, abstractmethod
 
 SERVICE_UUID = "ad91b201-7347-4047-9e17-3bed82d75f9d"
 RECV_CHARACTERISTIC_UUID = "b6fccb50-87be-44f3-ae22-f85485ea42c4"
@@ -45,7 +47,24 @@ class EMFDevice(gatt.Device):
                     self.command_characteristic = characteristic
                     self.connect_callback()
 
-class EMFDriver():
+class EMFDriver(ABC):
+    @abstractmethod
+    def reset(self):
+        pass
+
+    @abstractmethod
+    def sleep(self):
+        pass
+
+    @abstractmethod
+    def set_activity(self, level):
+        pass
+
+    @abstractmethod
+    def glitch(self):
+        pass
+
+class BluetoothEMFDriver(EMFDriver):
     def __init__(self):
         self.manager = gatt.DeviceManager(adapter_name='hci0')
         self.device = EMFDevice(
@@ -83,3 +102,24 @@ class EMFDriver():
     
     def glitch(self):
         return self._write_buffer([COMMAND_GLITCH])
+    
+class DummyEMFDriver(EMFDriver):
+    def reset(self):
+        print("EMF reset called")
+
+    def sleep(self):
+        print("EMF sleep called")
+
+    def set_activity(self, level):
+        print(f"EMF activity set to {level}")
+
+    def glitch(self):
+        print(f"EMF glitch called")
+    
+def get_emf_driver() -> EMFDriver:
+    try:
+        return BluetoothEMFDriver()
+    except Exception as ex:
+        print(f"Failed to initialize bluetooth EMF driver: {ex}")
+        print("Falling back to dummy EMF driver")
+        return DummyEMFDriver()
