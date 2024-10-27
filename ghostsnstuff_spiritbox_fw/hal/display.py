@@ -112,7 +112,8 @@ class DisplayRenderer:
                 display_width=6,
                 current_tick=display._text_ticks,
                 start_delay_seconds=0.5,
-                display_duration=display._text_duration * DISPLAY_REFRESH_INTERVAL,
+                display_duration=display._text_duration * DISPLAY_REFRESH_INTERVAL 
+                if display._text_duration else None,
                 max_scroll_duration=5.0
             )
             self._draw_text(draw, display._text, offset)
