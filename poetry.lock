@@ -1523,7 +1523,20 @@ files = [
     {file = "wcwidth-0.2.13.tar.gz", hash = "sha256:72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"},
 ]
 
+[[package]]
+name = "webrtcvad"
+version = "2.0.10"
+description = "Python interface to the Google WebRTC Voice Activity Detector (VAD)"
+optional = false
+python-versions = "*"
+files = [
+    {file = "webrtcvad-2.0.10.tar.gz", hash = "sha256:f1bed2fb25b63fb7b1a55d64090c993c9c9167b28485ae0bcdd81cf6ede96aea"},
+]
+
+[package.extras]
+dev = ["check-manifest", "memory_profiler", "nose", "psutil", "unittest2", "zest.releaser"]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "10c57781e6b8d1169800c33515860e2998f0a5a2ea3f56f87763caa76b03309c"
+content-hash = "6b9e3724abb1ff0fba3efc01ebb177b04c1351ecfba5e9656693e08ea819632e"

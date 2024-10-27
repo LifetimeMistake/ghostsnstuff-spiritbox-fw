@@ -19,6 +19,7 @@ soundfile = "^0.12.1"
 pillow = "^11.0.0"
 st7735 = { version = "^1.0.0", markers = "sys_platform != 'win32'" }
 pyaudio = "^0.2.14"
+webrtcvad = "^2.0.10"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
