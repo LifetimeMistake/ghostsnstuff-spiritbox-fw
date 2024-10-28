@@ -2,6 +2,7 @@ from typing import Self, Literal, Dict, Any
 from .events import EventTimeline, Event, EventActor
 import logging
 
+logging.basicConfig(level=logging.INFO)
 LogLevel = Literal["INFO", "WARN", "ERROR"]
 
 class ConsoleLog(Event):

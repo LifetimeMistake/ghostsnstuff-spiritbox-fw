@@ -2,7 +2,6 @@ from typing import Self, Literal, List, Dict, Any
 from datetime import datetime
 import logging
 
-logging.basicConfig(level=logging.INFO)
 EventActor = Literal["System", "Primary", "Secondary", "Curator"]
 
 class Event:
