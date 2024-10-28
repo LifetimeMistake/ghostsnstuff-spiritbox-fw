@@ -14,12 +14,11 @@ class TTSClient:
     def synthesize(self, content: str, voice_model: str, speed: float = 1.0) -> np.ndarray:
         print(content)
         response = self.client.audio.speech.create(
-            model="tts-1",
+            model="tts-1-hd",
             voice=voice_model,
             input=content,
             response_format="pcm",
             speed=speed,
-            timeout=2
         )
 
         pcm_data = np.frombuffer(response.content, dtype=np.int16)  # assuming 16-bit PCM data
