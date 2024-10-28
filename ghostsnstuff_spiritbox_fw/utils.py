@@ -78,3 +78,10 @@ def sanitize_ghost_speech(content: list[str] | str, word_limit: int = 5) -> list
         if len(sanitized_words) > word_limit:
             logging.warn(f"Trimming word list: {len(sanitized_words)}->{word_limit} words")
         return sanitized_words[:word_limit]
+    
+def polish_to_english(text):
+    polishenglish = str.maketrans(
+        "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ",
+        "acelnoszzACELNOSZZ"
+    )
+    return text.translate(polishenglish)

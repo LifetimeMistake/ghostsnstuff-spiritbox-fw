@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 from ghostsnstuff_spiritbox_fw.agents import Writer
 from ghostsnstuff_spiritbox_fw.scenario import ScenarioDefinition, load_scenario
 from ghostsnstuff_spiritbox_fw.events import EventTimeline
-from ghostsnstuff_spiritbox_fw.game import GameRuntime, RuntimeConfig, GhostActions, RuntimeExecutionResult
+from ghostsnstuff_spiritbox_fw.runtime import GameRuntime, RuntimeConfig, GhostActions, RuntimeExecutionResult
+from ghostsnstuff_spiritbox_fw.utils import polish_to_english
 import ghostsnstuff_spiritbox_fw.logging as logging
 from ghostsnstuff_spiritbox_fw.speech import STTClient, TTSClient, VOICE_MODELS
 import json
@@ -70,13 +71,6 @@ PRIMARY_GHOST_VOICE = "onyx"
 SECONDARY_GHOST_VOICE = "nova"
 VOICE_SPEED = 0.75
 TTS_SAMPLE_RATE = 16000
-
-def polish_to_english(text):
-    polishenglish = str.maketrans(
-        "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ",
-        "acelnoszzACELNOSZZ"
-    )
-    return text.translate(polishenglish)
 
 def execute_glitch():
     disp.enable_glitch(True)
