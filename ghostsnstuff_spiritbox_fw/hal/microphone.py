@@ -36,6 +36,11 @@ class Microphone(ABC):
         """Unregisters the VAD state change callback function."""
         pass
 
+    @abstractmethod
+    def get_sample_rate(self) -> int:
+        """returns the sample rate in Hz"""
+        pass
+
 
 class PaMicrophone(Microphone):
     def __init__(self):
