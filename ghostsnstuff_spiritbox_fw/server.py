@@ -240,8 +240,6 @@ class Server:
             raise Exception("Another thread is already executing the main loop")
         
         self._locked = True
-        self._reset_hardware()
-        self._enable_hardware()
         
         try:
             while True:
