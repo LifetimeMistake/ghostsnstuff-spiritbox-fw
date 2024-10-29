@@ -37,6 +37,8 @@ disp = get_display()
 spk = get_audio()
 emf = get_emf_driver()
 
+disp.begin()
+
 def handle_mic_icon(enabled):
     disp.set_icon_state(mic=enabled)
 mic.register_icon_callback(handle_mic_icon)
