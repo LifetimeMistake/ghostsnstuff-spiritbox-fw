@@ -149,8 +149,6 @@ def lose_condition():
     spk.set_interference_level(0)
     disp.enable_glitch(False)
 
-runtime.game_state.set_activity_level(3)
-
 while True:
     buffer = mic.await_buffer()
     disp.set_icon_state(thinking=True)
