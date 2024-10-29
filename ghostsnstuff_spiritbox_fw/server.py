@@ -244,8 +244,9 @@ class Server:
         self._enable_hardware()
         
         try:
-            executed = self._execute()
-            if executed != ExecutionState.NORMAL:
-                time.sleep(1)
+            while True:
+                executed = self._execute()
+                if executed != ExecutionState.NORMAL:
+                    time.sleep(1)
         finally:
             self._locked = False
