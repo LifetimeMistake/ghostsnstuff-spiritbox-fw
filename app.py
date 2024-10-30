@@ -23,13 +23,9 @@ timeline = EventTimeline()
 logging.set_timeline(timeline)
 
 ###### Configuration begins here
-scenario_file = "scenarios/scenario_built.json"
-scenario_prompt = "A group of ghost hunters is in Krośnica, a small village in Opole. They are trying to summon spirits of the dead. Unknowingly, they summon both a good and evil spirit. They must figure out which one to banish. Also, the group is polish speakers so while the scenario should be written in English, ghost details should be in Polish and they should also answer in Polish, same goes for the banishment rituals. They must be able to be spoken out loud in Polish."
 runtime_config.activity_grow_factor = 0.15
+server_config.debug_api_enabled = True
 ###### Configuration ends here
-
-###### Load scenario
-base_scenario = load_scenario(scenario_file)
 
 ###### Initialize HAL
 mic = get_microphone()
@@ -57,5 +53,4 @@ server = Server(
     runtime_config=runtime_config
 )
 
-server.start_scenario(base_scenario)
 server.mainloop()

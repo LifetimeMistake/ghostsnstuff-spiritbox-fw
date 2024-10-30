@@ -29,6 +29,12 @@ class ServerConfig:
     interference_volume: float = 0.5
     win_message: str = "Thank you..."
     lose_message: str = "You fool..."
+    debug_api_enabled: bool = False
+    debug_api_host: str = "0.0.0.0"
+    debug_api_port: int = 8080
+    debug_ui_enabled: bool = False
+    debug_ui_host: str = "0.0.0.0"
+    debug_ui_port: int = 8090
     
 class ExecutionState(Enum):
     INVALID_STATE = 0
@@ -55,6 +61,14 @@ class Server:
         self.tts_model = TTSClient(client)
         self.stt_client = STTClient(client)
         self._locked = False
+        if server_config.debug_api_enabled:
+            from .debug.api import DebugAPI
+            self._debug_api = DebugAPI(
+                server=self,
+                host=server_config.debug_api_host,
+                port=server_config.debug_api_port
+            )
+            self._debug_api.run()
     
     def _reset_hardware(self):
         self.speaker.set_interference_level(0)
@@ -194,6 +208,12 @@ class Server:
             return None
         
         return runtime.execute_command(command)
+    
+    def get_timeline(self) -> EventTimeline:
+        return self.timeline
+    
+    def get_current_scenario(self) -> ScenarioDefinition | None:
+        return self.current_scenario
     
     def _execute(self) -> ExecutionState:
         scenario = self.current_scenario
