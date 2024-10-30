@@ -1,4 +1,8 @@
 import random
+import numpy as np
+from scipy.io.wavfile import write
+import io
+import soundfile as sf
 from . import logging
 
 def clamp(n, minimum, maximum):
@@ -85,3 +89,12 @@ def polish_to_english(text):
         "acelnoszzACELNOSZZ"
     )
     return text.translate(polishenglish)
+
+def numpy_to_wav(buffer, sample_rate):
+    pcm_int16 = np.int16(buffer * 32767)
+    memory_buffer = io.BytesIO()
+    sf.write(memory_buffer, buffer, sample_rate, format='WAV', subtype='FLOAT')
+    memory_buffer.seek(0)
+    with open("output.wav", "wb") as f:
+        f.write(memory_buffer.read())
+    return memory_buffer
