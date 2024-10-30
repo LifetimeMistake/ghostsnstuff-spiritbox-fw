@@ -228,7 +228,7 @@ class Display(ABC):
 
             time.sleep(DISPLAY_REFRESH_INTERVAL)
 
-class WindowsDisplay(Display):
+class TkDisplay(Display):
     def __init__(self):
         super().__init__()
         self.renderer = DisplayRenderer()
@@ -304,14 +304,16 @@ class ConsoleDisplay(Display):
     def set_text(self, content, duration = None):
         super().set_text(content, duration)     
         logging.print(f"Display: Set text: {content}, duration: {duration}")
+        
+    def _render(self):
+        pass
 
 def get_display() -> Display:
-    if platform.isWindows():
-        if TK_AVAILABLE:
-            return WindowsDisplay()
-        else:
-            logging.warn("Detected Windows platform, but tkinter was not available")
-    
+    if TK_AVAILABLE:
+        return TkDisplay()
+    else:
+        logging.warn("Detected Windows platform, but tkinter was not available")
+
     if platform.isRaspberryPi():
         if ST7735_AVAILABLE:
             return ST7735Display()
