@@ -69,6 +69,11 @@ class Server:
             )
             self._debug_api.run()
         if server_config.debug_ui_enabled:
+            if not server_config.debug_api_enabled:
+                raise Exception("Debug UI requires the debug API to be enabled")
+            
+            # Wait for the debug API to init
+            time.sleep(3)
             from .debug.ui_launcher import DebugUI
             self._debug_ui = DebugUI(port=server_config.debug_ui_port)
             self._debug_ui.start_server()
