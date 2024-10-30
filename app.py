@@ -25,6 +25,7 @@ logging.set_timeline(timeline)
 ###### Configuration begins here
 runtime_config.activity_grow_factor = 0.15
 server_config.debug_api_enabled = True
+server_config.debug_ui_enabled = True
 ###### Configuration ends here
 
 ###### Initialize HAL

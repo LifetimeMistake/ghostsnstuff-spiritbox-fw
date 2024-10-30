@@ -109,6 +109,6 @@ class DebugAPI:
     def get_events(self) -> List[Dict[str, Any]]:
         timeline = self.server.get_timeline()
         if timeline:
-            return [event.to_dict() for event in timeline.list()]
+            return [event.to_dict() for event in timeline.list()[-150:]]
         else:
             raise HTTPException(status_code=404, detail="No events found")

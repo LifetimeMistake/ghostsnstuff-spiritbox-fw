@@ -33,7 +33,6 @@ class ServerConfig:
     debug_api_host: str = "0.0.0.0"
     debug_api_port: int = 8080
     debug_ui_enabled: bool = False
-    debug_ui_host: str = "0.0.0.0"
     debug_ui_port: int = 8090
     
 class ExecutionState(Enum):
@@ -69,6 +68,10 @@ class Server:
                 port=server_config.debug_api_port
             )
             self._debug_api.run()
+        if server_config.debug_ui_enabled:
+            from .debug.ui_launcher import DebugUI
+            self._debug_ui = DebugUI(port=server_config.debug_ui_port)
+            self._debug_ui.start_server()
     
     def _reset_hardware(self):
         self.speaker.set_interference_level(0)
@@ -224,6 +227,7 @@ class Server:
         buffer = self.mic.await_buffer()
         self.display.set_icon_state(thinking=True)
         user_query = self.stt_client.transcribe(buffer, self.mic.get_sample_rate())
+        logging.print(f"Detected speech: {user_query}")
         turn_result = runtime.execute(user_query)
         self.display.set_icon_state(thinking=False)
         
