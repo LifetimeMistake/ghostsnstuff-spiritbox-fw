@@ -26,9 +26,6 @@ logging.set_timeline(timeline)
 runtime_config.activity_grow_factor = 0.15
 server_config.debug_api_enabled = True
 server_config.debug_ui_enabled = True
-server_config.primary_ghost_voice = "nova"
-server_config.secondary_ghost_voice = "onyx"
-runtime_config.initial_activity_level = 10
 ###### Configuration ends here
 
 ###### Initialize HAL
