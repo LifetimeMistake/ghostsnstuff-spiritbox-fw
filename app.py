@@ -26,7 +26,8 @@ logging.set_timeline(timeline)
 runtime_config.activity_grow_factor = 0.15
 server_config.debug_api_enabled = True
 server_config.debug_ui_enabled = True
-server_config.voice_speed = 0.85
+server_config.voice_speed = 1
+runtime_config.initial_activity_level = 1
 ###### Configuration ends here
 
 ###### Initialize HAL

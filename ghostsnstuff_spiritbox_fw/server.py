@@ -92,7 +92,7 @@ class Server:
         
     def _execute_glitch(self):
         self.display.enable_glitch(True)
-        self.speaker.set_interference_level(2)
+        self.speaker.set_interference_level(3)
         self.emf.glitch()
         time.sleep(random.uniform(0.2, 0.5))
         self.speaker.set_interference_level(1)

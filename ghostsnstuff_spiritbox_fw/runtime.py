@@ -228,7 +228,6 @@ class GameRuntime:
 
         actions = GhostActions()
         actions.reasoning = response.reasoning
-
         # Process 
         if response.glitch:
             if state.activity_level < config.glitch_min_level:
@@ -244,14 +243,20 @@ class GameRuntime:
                 (config.speech_max_sentence_words if state.activity_level < 9 else 255) 
                 if isinstance(response.content, str) else config.speech_max_wordlist_words
             )
-
             sanitized_content = sanitize_ghost_speech(response.content, max_words)
-            if isinstance(sanitized_content, str):
-                self.__push_message(agent_choice, sanitized_content)
+            
+            if isinstance(response.content, str):
+                if state.activity_level < config.speech_min_sentence_level:
+                    logging.warn("Ghost attempted to speak, but it wasn't allowed to")
+                else:
+                    self.__push_message(agent_choice, sanitized_content)
+                    actions.speech = sanitized_content
             else:
-                self.__push_message(agent_choice, ", ".join(sanitized_content))
-
-            actions.speech = sanitized_content
+                if state.activity_level < config.speech_min_wordlist_level:
+                    logging.warn("Ghost attempted to speak, but it wasn't allowed to")
+                else:
+                    self.__push_message(agent_choice, ", ".join(sanitized_content))
+                    actions.speech = sanitized_content
 
         self.events.push(GhostCallEvent(agent_choice.capitalize(), actions))
         return actions
