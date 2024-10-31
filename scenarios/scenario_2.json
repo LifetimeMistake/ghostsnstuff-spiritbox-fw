@@ -32,7 +32,8 @@
           "solution": "Elias returned to the studio that night in a rage. In their struggle, Arin fell and hit his head on the easel, dying from the blow. Elias panicked and fled.",
           "hint": "A figure... a face... but it's shrouded."
         }
-        ]
+      ],
+      "tts_voice_model": "nova"
     },
     "secondary_ghost": {
       "name": "Vesper",
@@ -43,7 +44,8 @@
         "Forget the past, it's better this way.",
         "What matters is here and now.",
         "You’re too fragile to handle the truth."
-      ]
+      ],
+      "tts_voice_model": "onyx"
     },
     "shared_lore": "The graveyard is a place where lost souls linger, each tied to their own tragic demise. Time and reality warp within the mist, making it difficult for spirits to move on. Vesper feeds on their confusion and anguish, weaving lies to keep them bound to the graveyard. Every spirit trapped here has their own unresolved story, but Vesper prevents them from finding closure. Vesper's ultimate goal is to sustain this cycle of suffering for as long as possible.",
     "final_goal": {

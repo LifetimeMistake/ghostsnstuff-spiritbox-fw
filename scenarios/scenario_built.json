@@ -25,7 +25,8 @@
             "hint": "Przekleństwo to klucz do jego słabości.",
             "solution": "Mieszkańcy przeklęli go, aby nigdy nie zaznał spokoju."
           }
-        ]
+        ],
+        "tts_voice_model": "onyx"
       },
       "secondary_ghost": {
         "name": "Zofia",
@@ -47,7 +48,8 @@
             "hint": "Jej ostrzeżenia mogą was uratować.",
             "solution": "Kazimierz planował zniszczenie wioski, a Zofia próbowała go powstrzymać."
           }
-        ]
+        ],
+        "tts_voice_model": "nova"
       },
       "shared_lore": "Krośnica ma mroczną historię związaną z Kazimierzem, który tyranizował mieszkańców. Zofia była jedną z jego ofiar i teraz próbuje chronić innych przed jego złem.",
       "final_goal": {

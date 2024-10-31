@@ -95,6 +95,4 @@ def numpy_to_wav(buffer, sample_rate):
     memory_buffer = io.BytesIO()
     sf.write(memory_buffer, buffer, sample_rate, format='WAV', subtype='FLOAT')
     memory_buffer.seek(0)
-    with open("output.wav", "wb") as f:
-        f.write(memory_buffer.read())
     return memory_buffer

@@ -5,6 +5,7 @@ from openai import OpenAI
 from pathlib import Path
 from typing import Self, List
 from enum import Enum
+from datetime import datetime
 from .speech import STTClient, TTSClient, VOICE_MODELS
 from .runtime import RuntimeConfig
 from .hal.microphone import Microphone
@@ -19,8 +20,6 @@ from .utils import polish_to_english
 from . import logging
 
 class ServerConfig:
-    primary_ghost_voice: VOICE_MODELS = "onyx"
-    secondary_ghost_voice: VOICE_MODELS = "nova"
     voice_speed: float = 0.75
     tts_sample_rate: int = 16000
     base_scenarios_dir: Path = Path("./scenarios/")
@@ -107,12 +106,7 @@ class Server:
         self.display.set_text(text, duration=self.server_config.hint_display_duration)
         self.display.set_icon_state(response=False)
         
-    def _execute_ghost_actions(self, actions: GhostActions, ghost: GhostRole):
-        voice = (
-            self.server_config.primary_ghost_voice if ghost == 'primary' 
-            else self.server_config.secondary_ghost_voice
-        )
-        
+    def _execute_ghost_actions(self, actions: GhostActions, voice: VOICE_MODELS):
         if actions.glitch:
             self._execute_glitch()
             
@@ -224,12 +218,17 @@ class Server:
         return self.current_scenario
     
     def _execute(self) -> ExecutionState:
-        scenario = self.current_scenario
-        runtime = self.runtime
-        if not scenario or not runtime:
+        if not self.current_scenario or not self.runtime:
             return ExecutionState.INVALID_STATE
         
         buffer = self.mic.await_buffer()
+        
+        scenario = self.current_scenario
+        runtime = self.runtime
+        # Check again as await_buffer can block for long periods of time
+        if not scenario or not runtime:
+            return ExecutionState.INVALID_STATE
+        
         self.display.set_icon_state(thinking=True)
         user_query = self.stt_client.transcribe(buffer, self.mic.get_sample_rate())
         logging.print(f"Detected speech: {user_query}")
@@ -250,11 +249,11 @@ class Server:
         
         primary_first = turn_result.ghost_order == "primary"
         if primary_first and primary_actions:
-            self._execute_ghost_actions(primary_actions, "primary")
+            self._execute_ghost_actions(primary_actions, scenario.primary_ghost.tts_voice_model)
         if secondary_actions:
-            self._execute_ghost_actions(secondary_actions, "secondary")
+            self._execute_ghost_actions(secondary_actions, scenario.secondary_ghost.tts_voice_model)
         if not primary_first and primary_actions:
-            self._execute_ghost_actions(primary_actions, "primary")
+            self._execute_ghost_actions(primary_actions, scenario.primary_ghost.tts_voice_model)
             
         if not primary_has_content and not secondary_has_content:
             self.display.set_icon_state(no_response=True)

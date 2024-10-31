@@ -1,4 +1,4 @@
-from random import random
+import random
 from openai import OpenAI
 from typing import Self, Optional, List
 from .scenario import ScenarioDefinition
@@ -241,8 +241,8 @@ class GameRuntime:
         # Process vocal response
         if response.content:
             max_words = (
-                config.speech_max_wordlist_words if isinstance(response.content, list) 
-                else config.speech_max_sentence_words
+                (config.speech_max_sentence_words if state.activity_level < 9 else 255) 
+                if isinstance(response.content, str) else config.speech_max_wordlist_words
             )
 
             sanitized_content = sanitize_ghost_speech(response.content, max_words)

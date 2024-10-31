@@ -203,6 +203,12 @@ The scenario you write must be complete. That is, you must leave as little infor
 The hints field in the ghost definitions includes a set of example responses the ghosts might give, which helps the roleplay models shape their personality better. You may include as many examples as you like.
 
 Make sure to include the reasoning behind your choices for each ghost and how they interact within the scenario. You should also include your thought process behind the scenario itself and how you want the users to approach this scenario.
+
+Each ghost must have a distinct voice. There are a few available voice models to choose from:
+- nova: A soft-spoken, calming female voice.
+- onyx: A deep male voice
+- echo: Soft male voice
+- alloy: Another female voice
 """
 
 WRITER_USER_PROMPT = """

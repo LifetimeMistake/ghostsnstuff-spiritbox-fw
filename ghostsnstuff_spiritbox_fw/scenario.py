@@ -1,6 +1,5 @@
-from typing import List, Optional
+from typing import List, Optional, Literal
 from pydantic import BaseModel, TypeAdapter
-
 
 class RitualDefinition(BaseModel):
     name: str
@@ -20,6 +19,7 @@ class GhostDefinition(BaseModel):
     hints: List[str]
     ritual: Optional[RitualDefinition] = None  # This applies to ghosts with rituals
     key_memories: Optional[List[Memory]] = None  # This applies to ghosts with locked key memories
+    tts_voice_model: Literal["onyx", "nova", "alloy", "echo"]
 
 
 class FinalGoalDefinition(BaseModel):

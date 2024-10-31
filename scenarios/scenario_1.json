@@ -18,7 +18,8 @@
             "name": "The Binding of Shadows",
             "description": "A dark ritual that binds the users to Malakar, granting him control over them. The phrase must be recited verbatim.",
             "phrase": "Shadows bind, our fates entwined."
-        }
+        },
+        "tts_voice_model": "onyx"
     },
     "secondary_ghost": {
         "name": "Elara",
@@ -32,7 +33,8 @@
             "I know a way out, but you must trust me.",
             "Malakar is not what he seems.",
             "The shadows lie; seek the light within."
-        ]
+        ],
+        "tts_voice_model": "nova"
     },
     "shared_lore": "The mansion has a history of dark rituals performed by Malakar. Elara’s spirit is tied to the mansion, trying to help those trapped by Malakar's deceit.",
     "final_goal": {

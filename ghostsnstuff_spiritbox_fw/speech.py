@@ -20,6 +20,7 @@ class TTSClient:
             input=content,
             response_format="pcm",
             speed=speed,
+            timeout=5
         )
 
         pcm_data = np.frombuffer(response.content, dtype=np.int16)  # assuming 16-bit PCM data
@@ -35,5 +36,8 @@ class STTClient:
 
     def transcribe(self, buffer, sample_rate):
         wav_io = numpy_to_wav(buffer, sample_rate)
+        with open("output.wav", "wb") as f:
+            f.write(wav_io.read())
+        wav_io.seek(0)
         audio_file = open("output.wav", "rb")
         return self.client.audio.transcriptions.create(model="whisper-1", file=audio_file, response_format="text")
