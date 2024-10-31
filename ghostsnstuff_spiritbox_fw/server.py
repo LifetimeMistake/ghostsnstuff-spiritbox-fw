@@ -53,7 +53,7 @@ class Server:
         self.runtime: GameRuntime | None = None
         self.scenario_writer = Writer(
             client=client,
-            model=runtime_config.curator_model,
+            model=runtime_config.writer_model,
             temperature=runtime_config.curator_temperature
         )
         self.tts_model = TTSClient(client)
@@ -145,11 +145,11 @@ class Server:
         
     def _game_lost(self):
         buffer = self.tts_model.synthesize(self.server_config.lose_message, "onyx", 0.65)
-        self.speaker.set_interference_level(3)
+        self.speaker.set_interference_level(2)
         time.sleep(1)
         self.emf.set_activity(6)
         time.sleep(0.5)
-        audio_length = self.speaker.play_buffer(self.server_config.tts_sample_rate)
+        audio_length = self.speaker.play_buffer(buffer, self.server_config.tts_sample_rate)
         time.sleep(audio_length + 1)
         self.display.enable_glitch(True)
         self.display.enable_sweep(False)
@@ -274,6 +274,8 @@ class Server:
         try:
             while True:
                 executed = self._execute()
+                if executed == ExecutionState.GAME_END:
+                    self.stop_scenario()
                 if executed != ExecutionState.NORMAL:
                     time.sleep(1)
         finally:

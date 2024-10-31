@@ -13,6 +13,7 @@ from .utils import sanitize_ghost_speech, weighted_ghost_choice
 
 class RuntimeConfig:
     curator_model: str = "gpt-4o-mini"
+    writer_model: str = "gpt-4o"
     ghost_model: str = "gpt-4o-mini"
     curator_temperature: float = 0.2
     ghost_temperature: float = 0.5
@@ -33,6 +34,8 @@ class CuratorActions:
     game_result: Optional[GameResult] = None
     corrected_user_prompt: Optional[str] = None
     reasoning: str
+    action_reasoning: str
+    state_reasoning: str
 
 class GhostActions:
     glitch: bool = False
@@ -61,7 +64,7 @@ class GhostCallEvent(Event):
         return {
             **super().to_dict(),
             "used_glitch": self.used_glitch,
-            "speech": ", ".join(self.speech) if isinstance(self.speech, list) else self.speech
+            "speech": ", ".join(self.speech) if isinstance(self.speech, list) else self.speech,
         }
     
 class CuratorCallEvent(Event):
@@ -76,7 +79,9 @@ class CuratorCallEvent(Event):
             "new_secondary_note": self.data.new_secondary_note,
             "new_activity_level": self.data.new_activity_level,
             "new_timer_value": self.data.new_timer_value,
-            "game_result": self.data.game_result
+            "game_result": self.data.game_result,
+            "action_reasoning": self.data.action_reasoning,
+            "state_reasoning": self.data.state_reasoning
         }
 
 class SystemCallEvent(Event):
@@ -157,7 +162,10 @@ class GameRuntime:
         )
 
         actions = CuratorActions()
+        actions.game_result = response.game_result
         actions.reasoning = response.action_reasoning
+        actions.state_reasoning = response.state_reasoning
+        actions.action_reasoning = response.action_reasoning
 
         primary_note = response.primary_ghost_note
         secondary_note = response.secondary_ghost_note

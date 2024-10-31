@@ -19,7 +19,7 @@ class GhostDefinition(BaseModel):
     hints: List[str]
     ritual: Optional[RitualDefinition] = None  # This applies to ghosts with rituals
     key_memories: Optional[List[Memory]] = None  # This applies to ghosts with locked key memories
-    tts_voice_model: Literal["onyx", "nova", "alloy", "echo"]
+    tts_voice_model: str
 
 
 class FinalGoalDefinition(BaseModel):

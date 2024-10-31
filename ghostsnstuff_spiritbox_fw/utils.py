@@ -17,7 +17,8 @@ def weighted_ghost_choice(activity_level):
 
     if activity_level <= 3:
         # At levels 1-3, only primary ghost is active
-        primary_weight = 10
+        primary_weight = 9
+        secondary_weight = 1
     elif activity_level == 4:
         # At level 4, the secondary ghost becomes an option
         primary_weight = 8
