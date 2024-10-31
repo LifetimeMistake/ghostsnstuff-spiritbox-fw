@@ -15,7 +15,7 @@ from ghostsnstuff_spiritbox_fw.hal.speaker import get_audio
 from ghostsnstuff_spiritbox_fw.hal.microphone import get_microphone
 
 load_dotenv()
-
+ 
 client = OpenAI()
 runtime_config = RuntimeConfig()
 server_config = ServerConfig()
