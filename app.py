@@ -27,7 +27,6 @@ runtime_config.activity_grow_factor = 0.15
 server_config.debug_api_enabled = True
 server_config.debug_ui_enabled = True
 server_config.voice_speed = 0.85
-runtime_config.initial_activity_level = 10
 ###### Configuration ends here
 
 ###### Initialize HAL
@@ -55,6 +54,4 @@ server = Server(
     runtime_config=runtime_config
 )
 
-scenario = load_scenario("scenarios/scenario_1.json")
-server.start_scenario(scenario)
 server.mainloop()
