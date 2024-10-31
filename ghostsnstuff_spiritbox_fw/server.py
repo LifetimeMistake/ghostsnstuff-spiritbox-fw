@@ -16,7 +16,7 @@ from .events import EventTimeline
 from .agents import Writer
 from .scenario import ScenarioDefinition, load_scenario
 from .runtime import GameRuntime, SystemCallResult, GhostActions, GhostRole
-from .utils import polish_to_english
+from .utils import polish_to_english, haunted_effect
 from . import logging
 
 class ServerConfig:
@@ -116,10 +116,12 @@ class Server:
         if isinstance(actions.speech, list):
             buffers = self.tts_model.synthesize_batch(actions.speech, voice, self.server_config.voice_speed)
             for word, buffer in zip(actions.speech, buffers):
+                buffer = haunted_effect(buffer, self.server_config.tts_sample_rate)
                 self._play_ghost_speech(word, buffer)
                 time.sleep(random.uniform(0.5, 1.5))
         else:
             buffer = self.tts_model.synthesize(actions.speech, voice, self.server_config.voice_speed)
+            buffer = haunted_effect(buffer, self.server_config.tts_sample_rate)
             self._play_ghost_speech("XXXXXX", buffer)
             
     def _game_won(self):

@@ -1,9 +1,11 @@
+import io
 import random
 import numpy as np
-from scipy.io.wavfile import write
-import io
 import soundfile as sf
+from scipy.io.wavfile import write
+from scipy.signal import butter, filtfilt, resample
 from . import logging
+
 
 def clamp(n, minimum, maximum):
     return max(minimum, min(n, maximum))
@@ -96,3 +98,66 @@ def numpy_to_wav(buffer, sample_rate):
     sf.write(memory_buffer, buffer, sample_rate, format='WAV', subtype='FLOAT')
     memory_buffer.seek(0)
     return memory_buffer
+
+def bit_reduction(audio, bit_depth=8, mix=0.7):
+    factor = 2 ** (16 - bit_depth)
+    degraded_audio = np.round(audio * factor) / factor
+    return mix * audio + (1 - mix) * degraded_audio
+
+def sample_rate_reduction(audio, original_rate, target_rate, mix=0.7):
+    reduced_audio = resample(audio, int(len(audio) * target_rate / original_rate))
+    upsampled_audio = resample(reduced_audio, len(audio))
+    return mix * audio + (1 - mix) * upsampled_audio
+
+def bandpass_filter(audio, lowcut, highcut, sample_rate, order=5):
+    nyquist = 0.5 * sample_rate
+    low = lowcut / nyquist
+    high = highcut / nyquist
+    b, a = butter(order, [low, high], btype="band")
+    return filtfilt(b, a, audio)
+
+def amplitude_modulation(audio, sample_rate, mod_freq=2, depth=0.3):
+    t = np.arange(len(audio)) / sample_rate
+    modulation = 1 - depth * (1 + np.sin(2 * np.pi * mod_freq * t)) / 2
+    return audio * modulation
+
+def add_noise(audio, noise_level=0.01):
+    noise = np.random.normal(0, noise_level, audio.shape)
+    return audio + noise
+
+import numpy as np
+
+def random_dropouts(audio, dropout_rate=0.1, dropout_length=0.05, sample_rate=44100):
+    total_samples = len(audio)
+    dropout_samples = int(dropout_length * sample_rate)  # Duration of each dropout in samples
+    
+    for i in range(0, total_samples, int(sample_rate * 2)):  # Introduce dropouts every ~2 seconds
+        if np.random.rand() < dropout_rate:
+            start = i
+            end = min(i + dropout_samples, total_samples)
+            audio[start:end] = 0  # Mute this segment
+    return audio
+
+def variable_noise(audio, sample_rate, base_noise=0.00001, max_noise=0.01, change_rate=0.1):
+    total_samples = len(audio)
+    noise = np.random.normal(0, base_noise, total_samples)  # Start with base noise
+    
+    # Introduce random increases in noise level
+    for i in range(0, total_samples, int(0.5 * sample_rate)):  # Adjust every half-second
+        if np.random.rand() < change_rate:
+            noise_level = np.random.uniform(base_noise, max_noise)
+            noise[i:i + int(0.5 * sample_rate)] = np.random.normal(0, noise_level, int(0.5 * sample_rate))
+    return audio + noise
+
+
+def haunted_effect(audio, sample_rate):
+    # Apply each effect with a light touch
+    audio = bit_reduction(audio, bit_depth=5, mix=0.8)
+    audio = sample_rate_reduction(audio, sample_rate, 8000, mix=0.8)
+    audio = bandpass_filter(audio, 300, 3000, sample_rate)
+    audio = amplitude_modulation(audio, sample_rate, mod_freq=2, depth=0.2)
+    audio = add_noise(audio, noise_level=0.00001)
+    
+    # Add random dropouts and variable noise
+    audio = random_dropouts(audio, dropout_rate=0.2, dropout_length=0.05, sample_rate=sample_rate)    
+    return np.clip(audio, -1.0, 1.0)  # Ensure the signal stays within [-1.0, 1.0]

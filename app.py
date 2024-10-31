@@ -26,6 +26,8 @@ logging.set_timeline(timeline)
 runtime_config.activity_grow_factor = 0.15
 server_config.debug_api_enabled = True
 server_config.debug_ui_enabled = True
+server_config.voice_speed = 0.85
+runtime_config.initial_activity_level = 10
 ###### Configuration ends here
 
 ###### Initialize HAL
@@ -41,7 +43,6 @@ def handle_mic_icon(enabled):
 mic.register_icon_callback(handle_mic_icon)
 
 logging.print("Init OK")
-
 ###### Run server
 server = Server(
     client=client,
@@ -54,4 +55,6 @@ server = Server(
     runtime_config=runtime_config
 )
 
+scenario = load_scenario("scenarios/scenario_1.json")
+server.start_scenario(scenario)
 server.mainloop()
