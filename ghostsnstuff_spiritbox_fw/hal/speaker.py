@@ -27,7 +27,7 @@ class AudioDriver:
 
     def set_interference_level(self, level):
         """ Set the level of interference sound (0-2). """
-        if level < 0 or level > 2:
+        if level < 0 or level > 3:
             raise IndexError("Invalid interference level")
         
         if self.interference_channel.get_busy():
