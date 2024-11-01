@@ -272,7 +272,7 @@ class ST7735Display(Display):
         return super().begin()
     
     def _render(self):
-        buffer = self._render()
+        buffer = self.renderer.render(self)
         self.display.display(buffer)
 
 class ConsoleDisplay(Display):
@@ -309,15 +309,16 @@ class ConsoleDisplay(Display):
         pass
 
 def get_display() -> Display:
-    if TK_AVAILABLE:
-        return TkDisplay()
-    else:
-        logging.warn("Detected Windows platform, but tkinter was not available")
-
     if platform.isRaspberryPi():
         if ST7735_AVAILABLE:
             return ST7735Display()
         else:
             logging.warn("Detected Raspberry Pi platform, but st7735 was not available")
+            
+    if TK_AVAILABLE:
+        return TkDisplay()
+    else:
+        logging.warn("Detected Windows platform, but tkinter was not available")
+
 
     return ConsoleDisplay()
